@@ -1,0 +1,19 @@
+diff --git a/deps/openssl/config/archs/linux-aarch64/asm/openssl-cl.gypi b/deps/openssl/config/archs/linux-aarch64/asm/openssl-cl.gypi
+index ce19ed811b..0819b871d4 100644
+--- a/deps/openssl/config/archs/linux-aarch64/asm/openssl-cl.gypi
++++ b/deps/openssl/config/archs/linux-aarch64/asm/openssl-cl.gypi
+@@ -81,9 +81,13 @@
+   },
+   'defines': ['<@(openssl_defines_linux-aarch64)'],
+   'include_dirs': [
++    '.',
+     './include',
++    './crypto',
++    './crypto/include/internal',
+   ],
++  'includes': ['./openssl.gypi'],
+   'cflags' : ['<@(openssl_cflags_linux-aarch64)'],
+   'libraries': ['<@(openssl_ex_libs_linux-aarch64)'],
+-  'sources': ['<@(openssl_cli_srcs_linux-aarch64)'],
++  'sources': ['<@(openssl_sources)', '<@(openssl_sources_linux-aarch64)', '<@(openssl_cli_srcs_linux-aarch64)'],
+ }

@@ -1,0 +1,12 @@
+diff --git a/node.gypi b/node.gypi
+index 713ddbb74a..1ac115ae84 100644
+--- a/node.gypi
++++ b/node.gypi
+@@ -324,6 +324,7 @@
+             './deps/openssl/openssl.gyp:openssl',
+ 
+             # For tests
++            # https://github.com/openssl/openssl/issues/8102
+             './deps/openssl/openssl.gyp:openssl-cli',
+           ],
+           'conditions': [

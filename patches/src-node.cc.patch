@@ -1,0 +1,27 @@
+diff --git a/src/node.cc b/src/node.cc
+index 3ee25ebbd6..d8788066fa 100644
+--- a/src/node.cc
++++ b/src/node.cc
+@@ -460,17 +460,18 @@ MaybeLocal<Value> StartExecution(Environment* env, StartExecutionCallback cb) {
+       InternalCallbackScope::kSkipAsyncHooks);
+ 
+   if (cb != nullptr) {
+-    EscapableHandleScope scope(env->isolate());
++    // EscapableHandleScope scope(env->isolate());
+ 
+-    if (StartExecution(env, "internal/bootstrap/environment").IsEmpty())
+-      return {};
++    // if (StartExecution(env, "internal/bootstrap/environment").IsEmpty())
++    //   return {};
+ 
+     StartExecutionCallbackInfo info = {
+       env->process_object(),
+       env->native_module_require(),
+     };
+ 
+-    return scope.EscapeMaybe(cb(info));
++      // return scope.EscapeMaybe(cb(info));
++      cb(info);
+   }
+ 
+   if (env->worker_context() != nullptr) {

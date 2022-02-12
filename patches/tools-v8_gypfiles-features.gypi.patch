@@ -1,0 +1,26 @@
+diff --git a/tools/v8_gypfiles/features.gypi b/tools/v8_gypfiles/features.gypi
+index 6bb08bcebe..accb4fbc06 100644
+--- a/tools/v8_gypfiles/features.gypi
++++ b/tools/v8_gypfiles/features.gypi
+@@ -30,7 +30,7 @@
+ {
+   'variables': {
+     'v8_target_arch%': '<(target_arch)',
+-
++    'v8_target_os': '<(OS)',
+     'v8_current_cpu%': '<(target_arch)',
+ 
+     # Emulate GN variables
+@@ -371,6 +371,12 @@
+       ['v8_dict_property_const_tracking==1', {
+         'defines': ['V8_DICT_PROPERTY_CONST_TRACKING',],
+       }],
++      ['v8_target_os == "android"', {
++        'defines': [
++          'V8_HAVE_TARGET_OS',
++          'V8_TARGET_OS_ANDROID',
++        ],
++      }],
+     ],  # conditions
+     'defines': [
+       'V8_GYP_BUILD',

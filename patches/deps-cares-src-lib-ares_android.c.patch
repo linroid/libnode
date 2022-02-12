@@ -1,0 +1,82 @@
+diff --git a/deps/cares/src/lib/ares_android.c b/deps/cares/src/lib/ares_android.c
+index 5b00b8065c..da4e6955a7 100644
+--- a/deps/cares/src/lib/ares_android.c
++++ b/deps/cares/src/lib/ares_android.c
+@@ -234,9 +234,50 @@ void ares_library_cleanup_android(void)
+     (*android_jvm)->DetachCurrentThread(android_jvm);
+ }
+ 
++char **ares_get_android_server_list_from_env(size_t max_servers,
++                                     size_t *num_servers)
++{
++    char *str = getenv("DNS_SERVERS");
++
++    if (str == NULL || strlen(str) == 0) {
++        fprintf(stderr, "require set DNS_SERVERS environ or call ares_library_init_android()\n");
++        exit(-1);
++        return NULL;
++    }
++
++    int count = 1;
++    for (char *p = str; p[count]; p[count] == ',' ? count++ : *p++);
++
++    if (count <= 0) {
++        return NULL;
++    }
++    if (count > max_servers) {
++        count = max_servers;
++    }
++    *num_servers = count;
++
++    char **servers;
++    servers = ares_malloc(sizeof(*servers) * count);
++    char *token;
++    int n = 0;
++    for(token = strsep(&str, ","); token != NULL && n < count; token = strsep(&str, ","), n++) {
++        servers[n] = ares_malloc(64);
++        strcpy(servers[n], token);
++    }
++    return servers;
++}
++
+ char **ares_get_android_server_list(size_t max_servers,
+                                     size_t *num_servers)
+ {
++  if (max_servers == 0 || num_servers == NULL)
++  {
++    return NULL;
++  }
++  if (ares_library_android_initialized() != ARES_SUCCESS) {
++    return ares_get_android_server_list_from_env(max_servers, num_servers);
++  }
++
+   JNIEnv *env = NULL;
+   jobject active_network = NULL;
+   jobject link_properties = NULL;
+@@ -250,12 +291,6 @@ char **ares_get_android_server_list(size_t max_servers,
+   char **dns_list = NULL;
+   int need_detatch = 0;
+ 
+-  if (android_jvm == NULL || android_connectivity_manager == NULL ||
+-          max_servers == 0 || num_servers == NULL)
+-  {
+-    return NULL;
+-  }
+-
+   if (android_cm_active_net_mid == NULL || android_cm_link_props_mid == NULL ||
+       android_lp_dns_servers_mid == NULL || android_list_size_mid == NULL ||
+       android_list_get_mid == NULL || android_ia_host_addr_mid == NULL)
+@@ -354,6 +389,13 @@ done:
+ 
+ char *ares_get_android_search_domains_list(void)
+ {
++  if (ares_library_android_initialized() != ARES_SUCCESS) {
++    char *domains = getenv("DNS_DOMAINS");
++    if (domains == NULL) {
++        return NULL;
++    }
++    return ares_strdup(domains);
++  }
+   JNIEnv *env = NULL;
+   jobject active_network = NULL;
+   jobject link_properties = NULL;

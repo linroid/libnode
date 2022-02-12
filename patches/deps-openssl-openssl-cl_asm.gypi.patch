@@ -1,0 +1,16 @@
+diff --git a/deps/openssl/openssl-cl_asm.gypi b/deps/openssl/openssl-cl_asm.gypi
+index 3d828e3c50..fae40ba317 100644
+--- a/deps/openssl/openssl-cl_asm.gypi
++++ b/deps/openssl/openssl-cl_asm.gypi
+@@ -12,9 +12,9 @@
+       'includes': ['config/archs/linux-ppc64/asm/openssl-cl.gypi'],
+     }, 'target_arch=="s390x" and OS=="linux"', {
+       'includes': ['config/archs/linux64-s390x/asm/openssl-cl.gypi'],
+-    }, 'target_arch=="arm" and OS=="linux"', {
++    }, 'target_arch=="arm" and OS in "linux, android"', {
+       'includes': ['config/archs/linux-armv4/asm/openssl-cl.gypi'],
+-    }, 'target_arch=="arm64" and OS=="linux"', {
++    }, 'target_arch=="arm64" and OS in "linux, android"', {
+       'includes': ['config/archs/linux-aarch64/asm/openssl-cl.gypi'],
+     }, 'target_arch=="ia32" and OS=="freebsd"', {
+       'includes': ['config/archs/BSD-x86/asm/openssl-cl.gypi'],

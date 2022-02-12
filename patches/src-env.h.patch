@@ -1,0 +1,29 @@
+diff --git a/src/env.h b/src/env.h
+index 24b4a48b5f..a3636058f3 100644
+--- a/src/env.h
++++ b/src/env.h
+@@ -42,6 +42,7 @@
+ #include "util.h"
+ #include "uv.h"
+ #include "v8.h"
++#include "node_vfs.h"
+ 
+ #include <array>
+ #include <atomic>
+@@ -978,6 +979,7 @@ class Environment : public MemoryRetainer {
+   void MemoryInfo(MemoryTracker* tracker) const override;
+ 
+   EnvSerializeInfo Serialize(v8::SnapshotCreator* creator);
++  fs::VirtualFileSystem* VFS() { return vfs_; }
+   void CreateProperties();
+   void DeserializeProperties(const EnvSerializeInfo* info);
+ 
+@@ -1611,6 +1613,8 @@ class Environment : public MemoryRetainer {
+   // a given pointer.
+   std::unordered_map<char*, std::unique_ptr<v8::BackingStore>>
+       released_allocated_buffers_;
++  
++  fs::VirtualFileSystem* vfs_;
+ };
+ 
+ }  // namespace node

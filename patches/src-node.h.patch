@@ -1,0 +1,25 @@
+diff --git a/src/node.h b/src/node.h
+index 4348dfba5b..edae815ed4 100644
+--- a/src/node.h
++++ b/src/node.h
+@@ -402,7 +402,9 @@ enum Flags : uint64_t {
+   kNoRegisterESMLoader = 1 << 3,
+   // Set this flag to make Node.js track "raw" file descriptors, i.e. managed
+   // by fs.open() and fs.close(), and close them during FreeEnvironment().
+-  kTrackUnmanagedFds = 1 << 4
++  kTrackUnmanagedFds = 1 << 4,
++  // Set if Node.js is running for embedded environment
++  kOwnsEmbedded = 1 << 5
+ };
+ }  // namespace EnvironmentFlags
+ 
+@@ -450,6 +452,9 @@ NODE_EXTERN v8::MaybeLocal<v8::Value> LoadEnvironment(
+     const char* main_script_source_utf8);
+ NODE_EXTERN void FreeEnvironment(Environment* env);
+ 
++NODE_EXTERN void Mount(Environment* env, const char *src, const char *dst, const int mode);
++NODE_EXTERN void Chroot(Environment* env, const char *path);
++
+ // Set a callback that is called when process.exit() is called from JS,
+ // overriding the default handler.
+ // It receives the Environment* instance and the exit code as arguments.

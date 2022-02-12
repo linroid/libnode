@@ -1,0 +1,50 @@
+diff --git a/tools/v8_gypfiles/v8.gyp b/tools/v8_gypfiles/v8.gyp
+index 18945be931..4b4fbf4b1e 100644
+--- a/tools/v8_gypfiles/v8.gyp
++++ b/tools/v8_gypfiles/v8.gyp
+@@ -311,7 +311,7 @@
+           'sources': [
+             '<(V8_ROOT)/src/builtins/riscv64/builtins-riscv64.cc',
+           ],
+-        }],        
++        }],
+         ['v8_target_arch=="mips64" or v8_target_arch=="mips64el"', {
+           'sources': [
+             '<(V8_ROOT)/src/builtins/mips64/builtins-mips64.cc',
+@@ -885,7 +885,7 @@
+           'sources': [
+             '<!@pymod_do_main(GN-scraper "<(V8_ROOT)/BUILD.gn"  "\\"v8_base_without_compiler.*?v8_current_cpu == \\"riscv64\\".*?sources \\+= ")',
+           ],
+-        }],        
++        }],
+         ['OS=="win"', {
+           'msvs_precompiled_header': '<(V8_ROOT)/../../tools/msvs/pch/v8_pch.h',
+           'msvs_precompiled_source': '<(V8_ROOT)/../../tools/msvs/pch/v8_pch.cc',
+@@ -1114,10 +1114,10 @@
+             ],
+           },
+           'target_conditions': [
+-            ['_toolset=="host"', {
++            ['_toolset=="host" and host_os=="mac"', {
+               'sources': [
+                 '<(V8_ROOT)/src/base/debug/stack_trace_posix.cc',
+-                '<(V8_ROOT)/src/base/platform/platform-linux.cc',
++                '<(V8_ROOT)/src/base/platform/platform-macos.cc',
+               ],
+             }, {
+               'sources': [
+@@ -1602,12 +1602,12 @@
+           }],
+           ['clang or OS!="win"', {
+             'conditions': [
+-              ['_toolset == "host" and host_arch == "x64" or _toolset == "target" and target_arch=="x64"', {
++              ['_toolset == "host" and host_arch == "x64" and target_arch != "arm" or _toolset == "target" and target_arch=="x64"', {
+                 'sources': [
+                   '<(V8_ROOT)/src/heap/base/asm/x64/push_registers_asm.cc',
+                 ],
+               }],
+-              ['_toolset == "host" and host_arch == "ia32" or _toolset == "target" and target_arch=="ia32"', {
++              ['_toolset == "host" and (host_arch == "ia32" or target_arch == "arm") or _toolset == "target" and target_arch=="ia32"', {
+                 'sources': [
+                   '<(V8_ROOT)/src/heap/base/asm/ia32/push_registers_asm.cc',
+                 ],

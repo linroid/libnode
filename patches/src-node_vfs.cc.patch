@@ -1,0 +1,155 @@
+diff --git a/src/node_vfs.cc b/src/node_vfs.cc
+new file mode 100644
+index 0000000000..e44f0152ce
+--- /dev/null
++++ b/src/node_vfs.cc
+@@ -0,0 +1,148 @@
++//
++// Created by linroid on 1/3/21.
++//
++
++#include <cstring>
++#include <string>
++#include <sstream>
++#include <vector>
++#include "node_vfs.h"
++#include "node_file.h"
++
++namespace node {
++
++constexpr char separator = kPathSeparator;
++
++namespace fs {
++
++VirtualFileSystem::VirtualFileSystem() {}
++
++std::string VirtualFileSystem::Access(const char *path, int mode) {
++  if (root_.empty()) {
++    // the chroot() doesn't get called
++    return std::string(path);
++  }
++  std::string absolutePath = Resolve(path);
++  for (const auto &point : points_) {
++    if (absolutePath.find(point.dst) == 0) {
++      if ((mode & point.mode) == mode) {
++        auto subPath = absolutePath.substr(point.dst.length());
++        return point.src + subPath;
++      } else {
++        fprintf(stderr, "permission denied: %s, allowed: %d, request: %d", path, point.mode, mode);
++        return std::string();
++      }
++    }
++  }
++  return root_ + absolutePath;
++}
++
++std::string VirtualFileSystem::Path(const char *path) {
++  std::string result(path);
++  if (!root_.empty()) {
++    std::string absolutePath = Resolve(path);
++    std::vector <MountPoint> points(points_);
++    std::sort(points.begin(), points.end(),
++              [](MountPoint const &a, MountPoint const &b) {
++                return a.src > b.src;
++              });
++    for (const auto &point : points) {
++      if (absolutePath.find(point.src) == 0) {
++        auto subPath = absolutePath.substr(point.src.length());
++        result = point.dst + subPath;
++        break;
++      }
++    }
++  }
++  fprintf(stdout, "get virtual path: %s -> %s", path, result.c_str());
++  return result;
++
++}
++
++std::string VirtualFileSystem::Resolve(const char *path) {
++  // join the path to cwd
++  std::stringstream stream;
++  if (*path != separator && !cwd_.empty()) {
++    stream << cwd_;
++    if (cwd_[cwd_.length() - 1] != separator) {
++      stream << separator;
++    }
++  }
++  stream << path;
++
++  // split the path by separator
++  std::vector <std::string> segments;
++  for (;;) {
++    std::string segment;
++    if (!std::getline(stream, segment, separator)) {
++      break;
++    }
++    segments.push_back(segment);
++  }
++
++  // remove relative segments
++  std::vector <std::string> pruned;
++  for (auto &segment : segments) {
++    if (segment.empty() || segment == ".") {
++      continue;
++    }
++    if (segment == "..") {
++      pruned.pop_back();
++      continue;
++    }
++    pruned.push_back(segment);
++  }
++
++  // get the sanitized path
++  std::stringstream result;
++  for (auto &segment : pruned) {
++    result << separator << segment;
++  }
++  if (strlen(path) > 0 && path[strlen(path) - 1] == separator) {
++    result << separator;
++  }
++  return result.str();
++}
++
++void VirtualFileSystem::Chroot(const char *path) {
++  fprintf(stdout, "chroot: %s\n", path);
++  if (!root_.empty()) {
++    fprintf(stderr, "chroot has already been called: %s\n", root_.c_str());
++    abort();
++  }
++  root_ = std::string(path);
++  cwd_ = std::string(path);
++}
++
++void VirtualFileSystem::Mount(const char *src, const char *dst, int mode) {
++  fprintf(stdout, "mount: src=%s, dst=%s, mode=%d\n", src, dst, mode);
++
++  MountPoint point{
++      .src = std::string(src),
++      .dst = std::string(dst),
++      .mode = mode
++  };
++  points_.push_back(point);
++  std::sort(points_.begin(), points_.end(),
++            [](MountPoint const &a, MountPoint const &b) {
++              return a.dst > b.dst;
++            });
++}
++
++std::string VirtualFileSystem::Cwd() {
++  return cwd_;
++}
++
++bool VirtualFileSystem::Chdir(const char *path) {
++  std::string realPath = Access(path, kRead);
++  if (realPath.empty()) {
++    fprintf(stderr, "chdir(%s): failed\n", path);
++    return false;
++  }
++  fprintf(stdout, "chdir(%s): realPath=%s\n", path, realPath.c_str());
++  cwd_ = std::string(path);
++  return true;
++}
++
++}  // namespace fs
++}  // namespace node
+\ No newline at end of file

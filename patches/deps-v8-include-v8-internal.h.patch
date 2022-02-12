@@ -1,0 +1,13 @@
+diff --git a/deps/v8/include/v8-internal.h b/deps/v8/include/v8-internal.h
+index 5f0177182b..649c1f377d 100644
+--- a/deps/v8/include/v8-internal.h
++++ b/deps/v8/include/v8-internal.h
+@@ -485,7 +485,7 @@ void CastCheck<false>::Perform(T* data) {}
+ template <class T>
+ V8_INLINE void PerformCastCheck(T* data) {
+   CastCheck<std::is_base_of<Data, T>::value &&
+-            !std::is_same<Data, std::remove_cv_t<T>>::value>::Perform(data);
++            !std::is_same<Data, std::remove_cv<T>>::value>::Perform(data);
+ }
+ 
+ // A base class for backing stores, which is needed due to vagaries of

@@ -1,0 +1,13 @@
+diff --git a/src/node_file.h b/src/node_file.h
+index cf98c5c933..a40d8a7757 100644
+--- a/src/node_file.h
++++ b/src/node_file.h
+@@ -7,6 +7,8 @@
+ #include "node_messaging.h"
+ #include "node_snapshotable.h"
+ #include "stream_base.h"
++#include "node_vfs.h"
++#include <iostream>
+ 
+ namespace node {
+ namespace fs {

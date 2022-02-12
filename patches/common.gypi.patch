@@ -1,0 +1,24 @@
+diff --git a/common.gypi b/common.gypi
+index fcd1cebeb5..cefe14eb0f 100644
+--- a/common.gypi
++++ b/common.gypi
+@@ -132,7 +132,7 @@
+           ],
+         },
+         'defines': [ 'DEBUG', '_DEBUG', 'V8_ENABLE_CHECKS' ],
+-        'cflags': [ '-g', '-O0' ],
++        'cflags': [ '-g', '-O0', '-fno-omit-frame-pointer' ],
+         'conditions': [
+           ['OS=="aix"', {
+             'cflags': [ '-gxcoff' ],
+@@ -473,6 +473,10 @@
+             'defines': [ '_GLIBCXX_USE_C99_MATH' ],
+             'libraries': [ '-llog' ],
+           }],
++          ['_toolset=="target" and target_arch == "arm"', {
++            'defines': [ '_LIBCPP_HAS_NO_OFF_T_FUNCTIONS' ],
++          }],
++          
+           ['_toolset=="host"', {
+             'cflags': [ '-pthread' ],
+             'ldflags': [ '-pthread' ],

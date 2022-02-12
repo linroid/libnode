@@ -1,0 +1,19 @@
+diff --git a/src/api/environment.cc b/src/api/environment.cc
+index b7e213602b..2dacdb681a 100644
+--- a/src/api/environment.cc
++++ b/src/api/environment.cc
+@@ -383,6 +383,14 @@ void FreeEnvironment(Environment* env) {
+   delete env;
+ }
+ 
++NODE_EXTERN void Mount(Environment* env, const char *src, const char *dst, const int mode) {
++  env->VFS()->Mount(src, dst, mode);
++}
++
++NODE_EXTERN void Chroot(Environment* env, const char *path) {
++  env->VFS()->Chroot(path);
++}
++
+ NODE_EXTERN std::unique_ptr<InspectorParentHandle> GetInspectorParentHandle(
+     Environment* env,
+     ThreadId thread_id,

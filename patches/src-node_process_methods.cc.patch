@@ -1,0 +1,99 @@
+diff --git a/src/node_process_methods.cc b/src/node_process_methods.cc
+index e1ff446ac1..3d9065e265 100644
+--- a/src/node_process_methods.cc
++++ b/src/node_process_methods.cc
+@@ -11,7 +11,7 @@
+ #include "uv.h"
+ #include "v8-fast-api-calls.h"
+ #include "v8.h"
+-
++#include "node_file.h"
+ #include <vector>
+ 
+ #if HAVE_INSPECTOR
+@@ -68,7 +68,8 @@ Mutex umask_mutex;
+ #define NANOS_PER_SEC 1000000000
+ 
+ static void Abort(const FunctionCallbackInfo<Value>& args) {
+-  Abort();
++  Environment* env = Environment::GetCurrent(args);
++  env->Exit(0);
+ }
+ 
+ // For internal testing only, not exposed to userland.
+@@ -85,15 +86,20 @@ static void Chdir(const FunctionCallbackInfo<Value>& args) {
+   CHECK_EQ(args.Length(), 1);
+   CHECK(args[0]->IsString());
+   Utf8Value path(env->isolate(), args[0]);
+-  int err = uv_chdir(*path);
+-  if (err) {
+-    // Also include the original working directory, since that will usually
+-    // be helpful information when debugging a `chdir()` failure.
+-    char buf[PATH_MAX_BYTES];
+-    size_t cwd_len = sizeof(buf);
+-    uv_cwd(buf, &cwd_len);
+-    return env->ThrowUVException(err, "chdir", nullptr, buf, *path);
++  // Update for embedded mode and vfs
++  bool success = env->VFS()->Chdir(*path);
++  if (!success) {
++    return env->ThrowError("fail to chdir, permission denied");
+   }
++//  int err = uv_chdir(*path);
++//  if (err) {
++//    // Also include the original working directory, since that will usually
++//    // be helpful information when debugging a `chdir()` failure.
++//    char buf[PATH_MAX_BYTES];
++//    size_t cwd_len = sizeof(buf);
++//    uv_cwd(buf, &cwd_len);
++//    return env->ThrowUVException(err, "chdir", nullptr, buf, *path);
++//  }
+ }
+ 
+ inline Local<ArrayBuffer> get_fields_array_buffer(
+@@ -132,17 +138,26 @@ static void CPUUsage(const FunctionCallbackInfo<Value>& args) {
+ static void Cwd(const FunctionCallbackInfo<Value>& args) {
+   Environment* env = Environment::GetCurrent(args);
+   CHECK(env->has_run_bootstrapping_code());
+-  char buf[PATH_MAX_BYTES];
+-  size_t cwd_len = sizeof(buf);
+-  int err = uv_cwd(buf, &cwd_len);
+-  if (err)
+-    return env->ThrowUVException(err, "uv_cwd");
+-
+-  Local<String> cwd = String::NewFromUtf8(env->isolate(),
+-                                          buf,
++  std::string path = env->VFS()->Cwd();
++  if (path.size() > 0) {
++    Local<String> cwd = String::NewFromUtf8(env->isolate(),
++                                          path.c_str(),
+                                           NewStringType::kNormal,
+-                                          cwd_len).ToLocalChecked();
+-  args.GetReturnValue().Set(cwd);
++                                          path.size()).ToLocalChecked();
++    args.GetReturnValue().Set(cwd);
++  } else {
++    char buf[PATH_MAX_BYTES];
++    size_t cwd_len = sizeof(buf);
++    int err = uv_cwd(buf, &cwd_len);
++    if (err)
++      return env->ThrowUVException(err, "uv_cwd");
++
++    Local<String> cwd = String::NewFromUtf8(env->isolate(),
++                                            buf,
++                                            NewStringType::kNormal,
++                                            cwd_len).ToLocalChecked();
++    args.GetReturnValue().Set(cwd);
++  }
+ }
+ 
+ static void Kill(const FunctionCallbackInfo<Value>& args) {
+@@ -420,7 +435,8 @@ static void ReallyExit(const FunctionCallbackInfo<Value>& args) {
+   Environment* env = Environment::GetCurrent(args);
+   RunAtExit(env);
+   int code = args[0]->Int32Value(env->context()).FromMaybe(0);
+-  env->Exit(code);
++  // env->Exit(code);
++  Stop(env);
+ }
+ 
+ class FastHrtime : public BaseObject {
