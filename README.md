@@ -1,5 +1,7 @@
 # node_builder
 
+[![Build for Android](https://github.com/linroid/node_builder/actions/workflows/android.yml/badge.svg)](https://github.com/linroid/node_builder/actions/workflows/android.yml)
+
 Build Node.js shared library for knode
 
 ## Build from source
@@ -51,17 +53,19 @@ Build Node.js shared library for knode
    ```
 
 ## Modify Node.js
- Build scripts in this repository use patch files(under `patches` directory) to apply the changes for Node.js, this can make the Node.js upgrade work be easier and makes it intuitive to know what changes we made in our purpose.
- If you did some changes in node's codebase, you should generate patches files and commit `*.patch` files instead of commits changes directly.
+ Build scripts in this repository use [patch](https://man7.org/linux/man-pages/man1/patch.1.html) files(under the `patches` directory) to apply changes for Node.js, so the Node.js upgrade work can be easier and it is intuitive to know what changes we've made.
+ 
+ If you need to do some changes in node's codebase, you should generate patches files and commit `*.patch` files instead of commiting changes directly.
 
- Before doing your change, update local changes to latest, this will drop your local changes under `node` directory:
+ Before doing your change, make sure your local changes is up-to-date:
  ```
  git pull origin main
+ # your local changes under `node` directory will be dropped
  ./scripts/patch.sh apply -f
  ```
  Now you can edit any files in Node.js under the `node` directory, to commit your changes, you need to update the patch files:
  ```
  ./scripts/patch.sh generate
  ```
- Then commit these changes in patch files
+
  
