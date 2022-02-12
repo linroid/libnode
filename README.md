@@ -28,7 +28,7 @@ Build Node.js shared library for knode
     ```bash
    ./build.sh
     ```
- After build successfully, all the artifacts are under `outputs` directory
+ After build successfully, all the artifacts are under `artifacts` directory
 
 ## Upgrade Node.js
 

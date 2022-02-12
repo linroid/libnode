@@ -4,7 +4,7 @@ source "$(dirname "$0")"/env.sh
 
 if [ $# -lt 2 ]; then
   echo "$0 should have at least 2 parameters: target_arch, output_dir, for example"
-  echo "./build.sh arm64 $PWD/outputs/"
+  echo "./build.sh arm64 $PWD/artifacts/"
   exit 1
 fi
 
