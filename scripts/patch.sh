@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+source "$(dirname "$0")"/env.sh
 
 stash_new_files() {
   # add zero-length blob to the index for new untracked files
@@ -9,7 +9,7 @@ stash_new_files() {
 
 generate_patches() {
   echo "Generating patch files..."
-  cd ./node || exit
+  cd "$NODE_SOURCE_PATH" || exit
   IFS=$'
   '
 
@@ -27,7 +27,7 @@ generate_patches() {
 
 apply_patches() {
   echo "Applying patch files..."
-  cd ./node || exit
+  cd "$NODE_SOURCE_PATH" || exit
   if [[ $(git status --porcelain) ]]; then
     if [[ $1 == "-f" ]]; then
       echo "Dropping local changes..."
@@ -47,7 +47,7 @@ apply_patches() {
 }
 
 reset_changes() {
-  cd ./node || exit
+  cd "$NODE_SOURCE_PATH" || exit
   git reset HEAD --hard
   cd ../ || exit
   apply_patches

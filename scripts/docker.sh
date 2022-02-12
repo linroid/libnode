@@ -3,17 +3,16 @@
 set -e
 set -x
 
-if [ $# -lt 3 ]; then
-  echo "$0 should have at least 3 parameters: command, target_arch, output"
+if [ $# -lt 2 ]; then
+  echo "$0 should have at least 2 parameters: arch, output_dir"
   exit 1
 fi
 
-COMMAND=$1
-ARCH=$2
-OUTPUT=$3
+ARCH=$1
+OUTPUT=$2
 mkdir -p "$OUTPUT"
 
-NODE_SOURCE=`dirname $PWD`
+NODE_SOURCE=$(realname ./node)
 IMAGE_NAME=ndk20b
 
 case $COMMAND in
@@ -44,6 +43,6 @@ make)
   ;;
 *)
   echo "Unsupported command provided: $COMMAND"
-  exit -1
+  exit 1
   ;;
 esac

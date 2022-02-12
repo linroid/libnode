@@ -1,24 +1,16 @@
 #!/bin/bash
 
-# In order to cross-compile node for Android using NDK, run:
-#   source android-configure <path_to_ndk> [arch]
-#
-# By running android-configure with source, will allow environment variables to
-# be persistent in current session. This is useful for installing native node
-# modules with npm. Also, don't forget to set the arch in npm config using
-# 'npm config set arch=<arch>'
-
-set -e
-set -x
+source "$(dirname "$0")"/env.sh
 
 if [ $# -lt 2 ]; then
   echo "$0 should have at least 2 parameters: target_arch, output_dir, for example"
-  echo "./build.sh arm64 $PWD/artifacts/"
+  echo "./build.sh arm64 $PWD/outputs/"
   exit 1
 fi
 
 ARCH=$1
 OUTPUT=$(realpath "$2")
+
 
 CC_VER="4.9"
 
@@ -52,12 +44,11 @@ esac
 
 ANDROID_SDK_VERSION=23
 
-NODE_SOURCE=$PWD/node
 PREFIX="$OUTPUT"/"${ABI}"
 mkdir -p "$PREFIX"
 
 BUILD_DIR="$PWD"/build/android/"$ARCH"
-LINK_DIR="$NODE_SOURCE"/out
+LINK_DIR="$NODE_SOURCE_PATH"/out
 if [ -d "$LINK_DIR" ]; then
   unlink "$LINK_DIR"
 fi
@@ -104,7 +95,7 @@ GYP_DEFINES+=" android_target_arch=$ARCH"
 GYP_DEFINES+=" host_os=$HOST_OS OS=android"
 export GYP_DEFINES
 
-cd $NODE_SOURCE
+cd $NODE_SOURCE_PATH
 
 ./configure \
   --dest-cpu=$DEST_CPU \
