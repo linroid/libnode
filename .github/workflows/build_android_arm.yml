@@ -1,0 +1,17 @@
+name: Build Android(armeabi-v7a)
+
+on: workflow_dispatch
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      uses: ./
+      with:
+        entrypoint: /bin/bash
+        args: mkdir -p ./artifacts/android; ./scripts/patch.sh apply -f; ./scripts/build_android.sh arm ./artifacts/android
