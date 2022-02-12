@@ -2,4 +2,4 @@ build/
 out/
 node/
 .idea/
-artifacts/
+outputs/
