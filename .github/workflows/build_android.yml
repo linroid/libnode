@@ -10,19 +10,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: script
-      run: mkdir -p ./artifacts/android
-      shell: bash
+
     - name: Build Node.js(arm64-v8a)
       uses: ./
+      env:
+        ANDROID_ABI: arm64
       with:
         entrypoint: ./scripts/build_android.sh
-        args: arm64 ./artifacts/android
+        args: arm64
+
     - name: Build Node.js(armeabi-v7a)
       uses: ./
+      env:
+        ANDROID_ABI: arm
       with:
         entrypoint: ./scripts/build_android.sh
-        args: arm ./artifacts/android
+
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:

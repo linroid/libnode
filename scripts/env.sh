@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 export WORKSPACE=$(realpath "$(dirname "$0")"/../)
 
