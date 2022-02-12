@@ -10,11 +10,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: script
+      run: mkdir -p ./artifacts/android
+      shell: bash
     - name: Build Node.js
       uses: ./
       with:
-        entrypoint: /bin/bash
-        args: mkdir -p ./artifacts/android; ./scripts/patch.sh apply -f; ./scripts/build_android.sh arm64 ./artifacts/android
+        entrypoint: ./scripts/build_android.sh
+        args: arm64 ./artifacts/android
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:

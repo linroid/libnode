@@ -2,6 +2,10 @@
 
 source "$(dirname "$0")"/env.sh
 
+if [[ "$CI" = true ]]; then
+  source "${WORKSPACE}"/scripts/patch.sh apply -f
+fi
+
 if [ $# -lt 2 ]; then
   echo "$0 should have at least 2 parameters: target_arch, output_dir, for example"
   echo "./build.sh arm64 $PWD/artifacts/"
