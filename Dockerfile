@@ -3,12 +3,12 @@ FROM ubuntu:18.04
 
 ENV ANDROID_NDK_HOME /opt/android-ndk
 ENV ANDROID_NDK_VERSION r20b
-ENV NODE_VERSION v16.7.0
+ARG NODE_VERSION=v16.7.0
 
 # Install required tools
 RUN apt-get update -qq \
   && apt-get clean \
-  && apt-get install curl git unzip -y
+  && apt-get install curl git unzip python g++ gcc make gcc-multilib g++-multilib lib32z1 python3-pip python3-dev -y
 
 # Download and unpress NDK
 RUN mkdir /opt/android-ndk-tmp && \
@@ -18,11 +18,8 @@ RUN mkdir /opt/android-ndk-tmp && \
     mv ./android-ndk-${ANDROID_NDK_VERSION} ${ANDROID_NDK_HOME} && \
     rm -rf /opt/android-ndk-tmp
 
-# Add build tools
-RUN apt-get install python g++ gcc make gcc-multilib g++-multilib lib32z1 -y
-
 # Download node source
-RUN curl https://nodejs.org/dist/v17.5.0/node-v17.5.0.tar.gz | tar -xz  -C /
+RUN curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C /
 
 # Set environments
 RUN mkdir -p /output

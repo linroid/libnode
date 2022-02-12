@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Build for Android
 
 on:
   push:
@@ -14,5 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag node_builder:v16.7.0
+    - name: Build artifacts for Android
+      uses: ./
+      with:
+        entrypoint: ./build.sh
+        version: 'v16.7.0'

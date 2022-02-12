@@ -65,7 +65,7 @@ SUFFIX="$TOOLCHAIN_NAME$ANDROID_SDK_VERSION"
 HOST_ARCH=$(uname -m)
 HOST_OS=
 WORKER_COUNT=
-TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-$HOST_ARCH
+TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$(uname -s|awk '{print tolower($0)}')-$HOST_ARCH
 case $(uname -s) in
 Linux)
   WORKER_COUNT=$(nproc --all)

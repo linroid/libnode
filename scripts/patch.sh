@@ -38,7 +38,7 @@ apply_patches() {
       exit 1
     fi
   fi
-  PATCHES=$(find ../patches -name \*.patch)
+  PATCHES=$(find "${WORKSPACE}"/patches -name \*.patch)
   for patch in $PATCHES; do
     echo "Applying patch: $(basename "$patch")"
     patch --silent -p1 <"$patch"
