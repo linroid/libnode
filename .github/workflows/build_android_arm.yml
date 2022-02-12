@@ -10,8 +10,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build
+    - name: Build Node.js
       uses: ./
       with:
         entrypoint: /bin/bash
         args: mkdir -p ./artifacts/android; ./scripts/patch.sh apply -f; ./scripts/build_android.sh arm ./artifacts/android
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: armeabi-v7a
+        path: ./artifacts/android
