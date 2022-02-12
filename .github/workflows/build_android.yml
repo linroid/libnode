@@ -1,4 +1,4 @@
-name: Build Android(armeabi-v7a)
+name: Build Android
 
 on: workflow_dispatch
 
@@ -9,17 +9,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2v2
+    - uses: actions/checkout@v2
     - name: script
       run: mkdir -p ./artifacts/android
       shell: bash
-    - name: Build Node.js
+    - name: Build Node.js(arm64-v8a)
       uses: ./
       with:
         entrypoint: ./scripts/build_android.sh
         args: arm64 ./artifacts/android
+    - name: Build Node.js(armeabi-v7a)
+      uses: ./
+      with:
+        entrypoint: ./scripts/build_android.sh
+        args: arm ./artifacts/android
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: arm
+        name: arm64-v8a
         path: ./artifacts/android
