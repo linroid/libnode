@@ -26,3 +26,22 @@ jobs:
       with:
         name: libnode
         path: ./artifacts
+
+  macOS:
+    
+    runs-on: macos-11
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install tools
+      run: brew install coreutils
+
+    - name: Build Node.js
+      run: ./scripts/build_macos.sh
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: libnode
+        path: ./artifacts
