@@ -1,5 +1,5 @@
 diff --git a/tools/v8_gypfiles/v8.gyp b/tools/v8_gypfiles/v8.gyp
-index 18945be931..4b4fbf4b1e 100644
+index 18945be931..5ffb2be9b2 100644
 --- a/tools/v8_gypfiles/v8.gyp
 +++ b/tools/v8_gypfiles/v8.gyp
 @@ -311,7 +311,7 @@
@@ -38,13 +38,13 @@ index 18945be931..4b4fbf4b1e 100644
            ['clang or OS!="win"', {
              'conditions': [
 -              ['_toolset == "host" and host_arch == "x64" or _toolset == "target" and target_arch=="x64"', {
-+              ['_toolset == "host" and host_arch == "x64" and target_arch != "arm" or _toolset == "target" and target_arch=="x64"', {
++              ['_toolset == "host" and host_arch == "x64" and target_arch != "arm" and target_arch != "ia32" or _toolset == "target" and target_arch=="x64"', {
                  'sources': [
                    '<(V8_ROOT)/src/heap/base/asm/x64/push_registers_asm.cc',
                  ],
                }],
 -              ['_toolset == "host" and host_arch == "ia32" or _toolset == "target" and target_arch=="ia32"', {
-+              ['_toolset == "host" and (host_arch == "ia32" or target_arch == "arm") or _toolset == "target" and target_arch=="ia32"', {
++              ['_toolset == "host" and (host_arch == "ia32" or target_arch == "arm" or target_arch == "ia32") or _toolset == "target" and target_arch=="ia32"', {
                  'sources': [
                    '<(V8_ROOT)/src/heap/base/asm/ia32/push_registers_asm.cc',
                  ],

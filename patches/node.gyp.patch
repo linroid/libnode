@@ -1,7 +1,16 @@
 diff --git a/node.gyp b/node.gyp
-index 0c11797baa..ac6e7f4501 100644
+index 0c11797baa..352c31a2f0 100644
 --- a/node.gyp
 +++ b/node.gyp
+@@ -116,7 +116,7 @@
+           '-Wl,-bnoerrmsg',
+         ],
+       }],
+-      ['OS == "linux" and llvm_version != "0.0"', {
++      ['OS == "linux" and llvm_version != "0.0" or OS == "android" and target_arch == "ia32"', {
+         'libraries': ['-latomic'],
+       }],
+     ],
 @@ -389,6 +389,7 @@
          'src/node_env_var.cc',
          'src/node_errors.cc',

@@ -33,6 +33,7 @@ arm64 | aarch64)
   ;;
 x86)
   DEST_CPU="ia32"
+  ARCH="ia32"
   TOOLCHAIN_NAME="i686-linux-android"
   ABI="x86"
   EXTRA_OPTIONS="--openssl-no-asm"
@@ -50,7 +51,7 @@ x86_64)
   ;;
 esac
 
-ANDROID_SDK_VERSION=23
+ANDROID_SDK_VERSION=24
 
 PREFIX="$OUTPUT"/"${ABI}"
 mkdir -p "$PREFIX"
