@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-
 printenv
 
 export WORKSPACE=$(realpath "$(dirname "$0")"/../)

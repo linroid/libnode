@@ -19,7 +19,7 @@ fi
 OUTPUT="${WORKSPACE}/artifacts/android"
 
 CC_VER="4.9"
-EXTRA_OPTIONS=""
+EXTRA_OPTIONS=
 case $ARCH in
 arm)
   DEST_CPU="arm"
@@ -122,7 +122,7 @@ cd $NODE_SOURCE_PATH
   --without-dtrace \
   --with-intl=none \
   --shared \
-  "${EXTRA_OPTIONS}" \
+  ${EXTRA_OPTIONS} \
   --release-urlbase=https://dorajs.com/
   # --debug-lib \
   # --debug-node \
