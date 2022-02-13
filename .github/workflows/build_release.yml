@@ -19,7 +19,6 @@ jobs:
         ANDROID_ABI: ${{ matrix.arch }}
       with:
         entrypoint: ./scripts/build_android.sh
-        args: arm64
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
@@ -28,14 +27,19 @@ jobs:
         path: ./artifacts
 
   macOS:
-    
-    runs-on: macos-11
+    env:
+      NODE_VERSION: v16.7.0
+
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Install tools
       run: brew install coreutils
+
+    - name: Download Node.js tarball
+      run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
 
     - name: Build Node.js
       run: ./scripts/build_macos.sh

@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
+printenv
+
 export WORKSPACE=$(realpath "$(dirname "$0")"/../)
-echo $WORKSPACE
+
 if [[ -z "$NODE_SOURCE_PATH" ]]; then
     export NODE_SOURCE_PATH=$(realpath ./node)
 fi
