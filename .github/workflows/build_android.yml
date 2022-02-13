@@ -3,28 +3,23 @@ name: Build Android
 on: workflow_dispatch
 
 jobs:
-
   build:
-
+    strategy:
+      matrix:
+        arch: [arm64, arm]
+    
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Build Node.js(arm64-v8a)
+    - name: Build Node.js
       uses: ./
       env:
-        ANDROID_ABI: arm64
+        ANDROID_ABI: ${{ matrix.arch }}
       with:
         entrypoint: ./scripts/build_android.sh
         args: arm64
-
-    - name: Build Node.js(armeabi-v7a)
-      uses: ./
-      env:
-        ANDROID_ABI: arm
-      with:
-        entrypoint: ./scripts/build_android.sh
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
