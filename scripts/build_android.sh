@@ -19,7 +19,7 @@ fi
 OUTPUT="${WORKSPACE}/artifacts/android"
 
 CC_VER="4.9"
-
+EXTRA_OPTIONS=""
 case $ARCH in
 arm)
   DEST_CPU="arm"
@@ -35,12 +35,14 @@ x86)
   DEST_CPU="ia32"
   TOOLCHAIN_NAME="i686-linux-android"
   ABI="x86"
+  EXTRA_OPTIONS="--openssl-no-asm"
   ;;
 x86_64)
   DEST_CPU="x64"
   TOOLCHAIN_NAME="x86_64-linux-android"
   ARCH="x64"
   ABI="x86_64"
+  EXTRA_OPTIONS="--openssl-no-asm"
   ;;
 *)
   echo "Unsupported architecture provided: $ARCH"
@@ -119,7 +121,8 @@ cd $NODE_SOURCE_PATH
   --without-dtrace \
   --with-intl=none \
   --shared \
-  --release-urlbase=https://github.com/dorajs/node/
+  "${EXTRA_OPTIONS}" \
+  --release-urlbase=https://github.com/dorajs/shared_nodejs_builder/
   # --debug-lib \
   # --debug-node \
   # --openssl-no-asm \
