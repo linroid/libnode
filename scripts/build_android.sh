@@ -123,7 +123,7 @@ cd $NODE_SOURCE_PATH
   --with-intl=none \
   --shared \
   "${EXTRA_OPTIONS}" \
-  --release-urlbase=https://github.com/dorajs/shared_nodejs_builder/
+  --release-urlbase=https://dorajs.com/
   # --debug-lib \
   # --debug-node \
   # --openssl-no-asm \
