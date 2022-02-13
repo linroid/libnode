@@ -1,9 +1,9 @@
-name: Build Android
+name: Build Release
 
 on: workflow_dispatch
 
 jobs:
-  build:
+  Android:
     strategy:
       matrix:
         arch: [arm64, arm, x86_64, x86]

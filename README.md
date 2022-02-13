@@ -1,6 +1,6 @@
 # node_builder
 
-[![Build for Android](https://github.com/linroid/node_builder/actions/workflows/build_android.yml/badge.svg)](https://github.com/linroid/node_builder/actions/workflows/build_android.yml)
+[![Build Release](https://github.com/linroid/node_builder/actions/workflows/build_release.yml/badge.svg)](https://github.com/linroid/node_builder/actions/workflows/build_release.yml)
 
 Build Node.js shared library for knode
 
