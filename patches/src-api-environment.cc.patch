@@ -1,8 +1,8 @@
 diff --git a/src/api/environment.cc b/src/api/environment.cc
-index b7e213602b..2dacdb681a 100644
+index 0fb750c5ab..02e2a8f54b 100644
 --- a/src/api/environment.cc
 +++ b/src/api/environment.cc
-@@ -383,6 +383,14 @@ void FreeEnvironment(Environment* env) {
+@@ -386,6 +386,14 @@ void FreeEnvironment(Environment* env) {
    delete env;
  }
  

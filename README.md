@@ -1,6 +1,6 @@
 # node_builder
 
-[![Build Release](https://github.com/linroid/node_builder/actions/workflows/build_release.yml/badge.svg)](https://github.com/linroid/node_builder/actions/workflows/build_release.yml) [![v16.7.0](https://img.shields.io/badge/Node.js-v16.7.0-blue)](https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V16.md#16.7.0)
+[![Build Release](https://github.com/linroid/node_builder/actions/workflows/build_release.yml/badge.svg)](https://github.com/linroid/node_builder/actions/workflows/build_release.yml) [![v16.14.0](https://img.shields.io/badge/Node.js-v16.7.0-blue)](https://github.com/nodejs/node/blob/master/doc/changelogs/CHANGELOG_V16.md#v16.14.0)
 
 Build Node.js shared library for knode
 

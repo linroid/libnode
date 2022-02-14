@@ -1,8 +1,8 @@
 diff --git a/deps/uv/uv.gyp b/deps/uv/uv.gyp
-index f03b4b4c0f..fd2bbb76b2 100644
+index 47de0d7ede..5fd1b40a00 100644
 --- a/deps/uv/uv.gyp
 +++ b/deps/uv/uv.gyp
-@@ -253,6 +253,7 @@
+@@ -254,6 +254,7 @@
          }],
          [ 'OS=="android"', {
            'sources': [
@@ -10,7 +10,7 @@ index f03b4b4c0f..fd2bbb76b2 100644
              'src/unix/linux-core.c',
              'src/unix/linux-inotify.c',
              'src/unix/linux-syscalls.c',
-@@ -262,6 +263,7 @@
+@@ -263,6 +264,7 @@
              'src/unix/procfs-exepath.c',
              'src/unix/random-getrandom.c',
              'src/unix/random-sysctl-linux.c',

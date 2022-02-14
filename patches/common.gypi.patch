@@ -1,8 +1,8 @@
 diff --git a/common.gypi b/common.gypi
-index fcd1cebeb5..cefe14eb0f 100644
+index adbd826a4f..963117e459 100644
 --- a/common.gypi
 +++ b/common.gypi
-@@ -132,7 +132,7 @@
+@@ -141,7 +141,7 @@
            ],
          },
          'defines': [ 'DEBUG', '_DEBUG', 'V8_ENABLE_CHECKS' ],
@@ -11,7 +11,7 @@ index fcd1cebeb5..cefe14eb0f 100644
          'conditions': [
            ['OS=="aix"', {
              'cflags': [ '-gxcoff' ],
-@@ -473,6 +473,10 @@
+@@ -487,6 +487,10 @@
              'defines': [ '_GLIBCXX_USE_C99_MATH' ],
              'libraries': [ '-llog' ],
            }],

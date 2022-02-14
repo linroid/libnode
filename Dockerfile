@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 
 ENV ANDROID_NDK_HOME /opt/android-ndk
 ENV ANDROID_NDK_VERSION r20b
-ARG NODE_VERSION=v16.7.0
+ARG NODE_VERSION=v16.14.0
 
 # Install required tools
 RUN apt-get update -qq \

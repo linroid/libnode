@@ -1,5 +1,5 @@
 diff --git a/tools/v8_gypfiles/toolchain.gypi b/tools/v8_gypfiles/toolchain.gypi
-index 564f775f21..78c12c82e8 100644
+index d10525af57..86ca03edbb 100644
 --- a/tools/v8_gypfiles/toolchain.gypi
 +++ b/tools/v8_gypfiles/toolchain.gypi
 @@ -62,9 +62,9 @@

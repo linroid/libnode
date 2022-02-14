@@ -1,5 +1,5 @@
 diff --git a/src/node.cc b/src/node.cc
-index 3ee25ebbd6..d8788066fa 100644
+index 7f18a21f67..09d45e2dd0 100644
 --- a/src/node.cc
 +++ b/src/node.cc
 @@ -460,17 +460,18 @@ MaybeLocal<Value> StartExecution(Environment* env, StartExecutionCallback cb) {

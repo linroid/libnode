@@ -1,8 +1,8 @@
 diff --git a/deps/uv/src/unix/fs.c b/deps/uv/src/unix/fs.c
-index eb17fb4a23..a1115508fa 100644
+index 362c36c6a0..d1da808159 100644
 --- a/deps/uv/src/unix/fs.c
 +++ b/deps/uv/src/unix/fs.c
-@@ -1300,6 +1300,8 @@ static ssize_t uv__fs_copyfile(uv_fs_t* req) {
+@@ -1339,6 +1339,8 @@ static ssize_t uv__fs_copyfile(uv_fs_t* req) {
  #endif  /* !__linux__ */
    }
  
@@ -11,7 +11,7 @@ index eb17fb4a23..a1115508fa 100644
  #ifdef FICLONE
    if (req->flags & UV_FS_COPYFILE_FICLONE ||
        req->flags & UV_FS_COPYFILE_FICLONE_FORCE) {
-@@ -1321,6 +1323,7 @@ static ssize_t uv__fs_copyfile(uv_fs_t* req) {
+@@ -1360,6 +1362,7 @@ static ssize_t uv__fs_copyfile(uv_fs_t* req) {
    }
  #endif
  

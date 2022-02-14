@@ -3,7 +3,7 @@ name: Build Release
 on: workflow_dispatch
 
 env:
-  NODE_VERSION: v16.7.0
+  NODE_VERSION: v16.14.0
 
 jobs:
   Android:

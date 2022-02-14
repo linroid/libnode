@@ -1,8 +1,8 @@
 diff --git a/src/node_process_methods.cc b/src/node_process_methods.cc
-index e1ff446ac1..3d9065e265 100644
+index bc5d41382f..0b510ac2f4 100644
 --- a/src/node_process_methods.cc
 +++ b/src/node_process_methods.cc
-@@ -11,7 +11,7 @@
+@@ -12,7 +12,7 @@
  #include "uv.h"
  #include "v8-fast-api-calls.h"
  #include "v8.h"
@@ -11,7 +11,7 @@ index e1ff446ac1..3d9065e265 100644
  #include <vector>
  
  #if HAVE_INSPECTOR
-@@ -68,7 +68,8 @@ Mutex umask_mutex;
+@@ -62,7 +62,8 @@ Mutex umask_mutex;
  #define NANOS_PER_SEC 1000000000
  
  static void Abort(const FunctionCallbackInfo<Value>& args) {
@@ -21,7 +21,7 @@ index e1ff446ac1..3d9065e265 100644
  }
  
  // For internal testing only, not exposed to userland.
-@@ -85,15 +86,20 @@ static void Chdir(const FunctionCallbackInfo<Value>& args) {
+@@ -79,15 +80,20 @@ static void Chdir(const FunctionCallbackInfo<Value>& args) {
    CHECK_EQ(args.Length(), 1);
    CHECK(args[0]->IsString());
    Utf8Value path(env->isolate(), args[0]);
@@ -50,7 +50,7 @@ index e1ff446ac1..3d9065e265 100644
  }
  
  inline Local<ArrayBuffer> get_fields_array_buffer(
-@@ -132,17 +138,26 @@ static void CPUUsage(const FunctionCallbackInfo<Value>& args) {
+@@ -126,17 +132,26 @@ static void CPUUsage(const FunctionCallbackInfo<Value>& args) {
  static void Cwd(const FunctionCallbackInfo<Value>& args) {
    Environment* env = Environment::GetCurrent(args);
    CHECK(env->has_run_bootstrapping_code());
@@ -87,7 +87,7 @@ index e1ff446ac1..3d9065e265 100644
  }
  
  static void Kill(const FunctionCallbackInfo<Value>& args) {
-@@ -420,7 +435,8 @@ static void ReallyExit(const FunctionCallbackInfo<Value>& args) {
+@@ -443,7 +458,8 @@ static void ReallyExit(const FunctionCallbackInfo<Value>& args) {
    Environment* env = Environment::GetCurrent(args);
    RunAtExit(env);
    int code = args[0]->Int32Value(env->context()).FromMaybe(0);
@@ -96,4 +96,4 @@ index e1ff446ac1..3d9065e265 100644
 +  Stop(env);
  }
  
- class FastHrtime : public BaseObject {
+ namespace process {
