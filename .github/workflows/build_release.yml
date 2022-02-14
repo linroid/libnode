@@ -7,8 +7,6 @@ env:
 
 jobs:
   Android:
-    env:
-      ANDROID_NDK_HOME: /opt/android-ndk
     strategy:
       matrix:
         arch: [arm64, arm, x86_64, x86]
@@ -19,7 +17,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install tools
-      run: apt install g++ gcc make gcc-multilib g++-multilib lib32z1 python3-pip python3-dev -y
+      run: sudo apt-get install g++ gcc make gcc-multilib g++-multilib lib32z1 python3-pip python3-dev -y
 
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
@@ -30,7 +28,6 @@ jobs:
       run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
 
     - name: Build Node.js
-      uses: ./
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       run: ./scripts/build_android.sh ${{ matrix.arch }}
@@ -38,7 +35,7 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: Node.js-${NODE_VERSION}-${{ matrix.arch }}.zip
+        name: Node.js-${NODE_VERSION}-android-${{ matrix.arch }}.zip
         path: ./artifacts/android
 
   macOS:
@@ -60,5 +57,5 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: Node.js-${NODE_VERSION}-${{ matrix.arch }}.zip
+        name: Node.js-${NODE_VERSION}-macos-x86_64.zip
         path: ./artifacts/macos

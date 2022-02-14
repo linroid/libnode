@@ -7,7 +7,7 @@ if [[ "$CI" = true ]]; then
 fi
 
 if [[ -z "$ANDROID_ABI" ]]; then
-  if [ $# -lt 2 ]; then
+  if [ $# -lt 1 ]; then
     echo "Please specific a ABI(arm64, arm, x86_64, x86), for example:"
     echo "./build.sh arm64"
     exit 1
