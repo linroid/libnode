@@ -56,13 +56,16 @@ ANDROID_SDK_VERSION=24
 PREFIX="$OUTPUT"/"${ABI}"
 mkdir -p "$PREFIX"
 
-BUILD_DIR="$PWD"/build/android/"$ARCH"
-LINK_DIR="$NODE_SOURCE_PATH"/out
-if [ -d "$LINK_DIR" ]; then
-  unlink "$LINK_DIR"
+if [[ "$CI" != true ]]; then
+  # Link different directories for different arch, this makes the local build faster
+  BUILD_DIR="$PWD"/build/android/"$ARCH"
+  LINK_DIR="$NODE_SOURCE_PATH"/out
+  if [ -d "$LINK_DIR" ]; then
+    unlink "$LINK_DIR"
+  fi
+  mkdir -p "$BUILD_DIR"
+  ln -s "$BUILD_DIR" "$LINK_DIR"
 fi
-mkdir -p "$BUILD_DIR"
-ln -s "$BUILD_DIR" "$LINK_DIR"
 
 export CC_host=$(which gcc)
 export CXX_host=$(which g++)

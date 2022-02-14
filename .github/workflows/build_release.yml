@@ -2,8 +2,13 @@ name: Build Release
 
 on: workflow_dispatch
 
+env:
+  NODE_VERSION: v16.7.0
+
 jobs:
   Android:
+    env:
+      ANDROID_NDK_HOME: /opt/android-ndk
     strategy:
       matrix:
         arch: [arm64, arm, x86_64, x86]
@@ -13,22 +18,30 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Install tools
+      run: apt install g++ gcc make gcc-multilib g++-multilib lib32z1 python3-pip python3-dev -y
+
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r20b
+
+    - name: Download Node.js tarball
+      run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
+
     - name: Build Node.js
       uses: ./
       env:
-        ANDROID_ABI: ${{ matrix.arch }}
-      with:
-        entrypoint: ./scripts/build_android.sh
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+      run: ./scripts/build_android.sh ${{ matrix.arch }}
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: libnode
-        path: ./artifacts
+        name: Node.js-${NODE_VERSION}-${{ matrix.arch }}.zip
+        path: ./artifacts/android
 
   macOS:
-    env:
-      NODE_VERSION: v16.7.0
 
     runs-on: macos-latest
 
@@ -47,5 +60,5 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: libnode
-        path: ./artifacts
+        name: Node.js-${NODE_VERSION}-${{ matrix.arch }}.zip
+        path: ./artifacts/macos

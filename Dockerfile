@@ -22,6 +22,5 @@ RUN mkdir /opt/android-ndk-tmp && \
 RUN curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C /
 
 # Set environments
-RUN mkdir -p /output
 ENV PATH ${PATH}:${ANDROID_NDK_HOME}
 ENV NODE_SOURCE_PATH /node-${NODE_VERSION}
