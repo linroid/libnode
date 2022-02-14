@@ -16,7 +16,7 @@ generate_patches() {
   stash_new_files
 
   # shellcheck disable=SC2207
-  MODIFIED_FILES=($(git status --porcelain | grep -E "^ [AM]" | sed s/^...//))
+  MODIFIED_FILES=($(git status --porcelain | grep -E "^ ?[AM]" | sed s/^...//))
   for value in "${MODIFIED_FILES[@]}"; do
     git diff "$value" >"../patches/${value//\//-}.patch"
   done

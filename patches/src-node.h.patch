@@ -1,11 +1,13 @@
 diff --git a/src/node.h b/src/node.h
-index 5b1404ff8e..8ccb1f3dcb 100644
+index 5b1404ff8e..ada755afdc 100644
 --- a/src/node.h
 +++ b/src/node.h
-@@ -439,6 +439,8 @@ enum Flags : uint64_t {
+@@ -438,7 +438,9 @@ enum Flags : uint64_t {
+   // $HOME/.node_modules and $NODE_PATH. This is used by standalone apps that
    // do not expect to have their behaviors changed because of globally
    // installed modules.
-   kNoGlobalSearchPaths = 1 << 7
+-  kNoGlobalSearchPaths = 1 << 7
++  kNoGlobalSearchPaths = 1 << 7,
 +  // Set if Node.js is running for embedded environment
 +  kOwnsEmbedded = 1 << 8
  };
