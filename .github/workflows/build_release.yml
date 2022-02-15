@@ -35,7 +35,7 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: Node.js-${NODE_VERSION}-android-${{ matrix.arch }}.zip
+        name: Node.js-${NODE_VERSION}-android.zip
         path: ./artifacts/android
 
   macOS:
