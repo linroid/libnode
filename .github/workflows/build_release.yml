@@ -35,7 +35,7 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: Node.js-${{ env.NODE_VERSION }}-android.zip
+        name: libnode-${{ env.NODE_VERSION }}-android.zip
         path: ./artifacts/android
 
   macOS:
@@ -57,5 +57,5 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: Node.js-${{ env.NODE_VERSION }}-macos-x86_64.zip
+        name: libnode-${{ env.NODE_VERSION }}-macos-x86_64.zip
         path: ./artifacts/macos
