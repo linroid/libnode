@@ -1,27 +1,33 @@
 diff --git a/src/node.cc b/src/node.cc
-index 7f18a21f67..09d45e2dd0 100644
+index 7f18a21f67..9c555e98ef 100644
 --- a/src/node.cc
 +++ b/src/node.cc
-@@ -460,17 +460,18 @@ MaybeLocal<Value> StartExecution(Environment* env, StartExecutionCallback cb) {
+@@ -425,7 +425,8 @@ void MarkBootstrapComplete(const FunctionCallbackInfo<Value>& args) {
+   Environment* env = Environment::GetCurrent(args);
+   env->performance_state()->Mark(
+       performance::NODE_PERFORMANCE_MILESTONE_BOOTSTRAP_COMPLETE);
+-}
++  env->OnBootstrapCompleted();
++};
+ 
+ static
+ MaybeLocal<Value> StartExecution(Environment* env, const char* main_script_id) {
+@@ -460,17 +461,7 @@ MaybeLocal<Value> StartExecution(Environment* env, StartExecutionCallback cb) {
        InternalCallbackScope::kSkipAsyncHooks);
  
    if (cb != nullptr) {
 -    EscapableHandleScope scope(env->isolate());
-+    // EscapableHandleScope scope(env->isolate());
- 
+-
 -    if (StartExecution(env, "internal/bootstrap/environment").IsEmpty())
 -      return {};
-+    // if (StartExecution(env, "internal/bootstrap/environment").IsEmpty())
-+    //   return {};
- 
-     StartExecutionCallbackInfo info = {
-       env->process_object(),
-       env->native_module_require(),
-     };
- 
+-
+-    StartExecutionCallbackInfo info = {
+-      env->process_object(),
+-      env->native_module_require(),
+-    };
+-
 -    return scope.EscapeMaybe(cb(info));
-+      // return scope.EscapeMaybe(cb(info));
-+      cb(info);
++    env->SetBootstrapCompletedCallback(cb);
    }
  
    if (env->worker_context() != nullptr) {

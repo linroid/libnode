@@ -1,5 +1,5 @@
 diff --git a/src/env.cc b/src/env.cc
-index e3e06598a5..0d03ba01d6 100644
+index e3e06598a5..4dec66cc5d 100644
 --- a/src/env.cc
 +++ b/src/env.cc
 @@ -27,6 +27,11 @@
@@ -95,3 +95,19 @@ index e3e06598a5..0d03ba01d6 100644
    inspector_host_port_ = std::make_shared<ExclusiveAccess<HostPort>>(
        options_->debug_options().host_port);
  
+@@ -1715,6 +1745,15 @@ void Environment::RunWeakRefCleanup() {
+   isolate()->ClearKeptObjects();
+ }
+ 
++void Environment::OnBootstrapCompleted() {
++  StartExecutionCallbackInfo info = {
++      process_object(),
++      native_module_require(),
++  };
++  bootstrap_completed_callback_(info);
++  bootstrap_completed_callback_ = StartExecutionCallback {};
++}
++
+ // Not really any better place than env.cc at this moment.
+ void BaseObject::DeleteMe(void* data) {
+   BaseObject* self = static_cast<BaseObject*>(data);

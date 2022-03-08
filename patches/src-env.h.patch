@@ -1,5 +1,5 @@
 diff --git a/src/env.h b/src/env.h
-index 17aa6c7222..473a9fc89a 100644
+index 17aa6c7222..492b9a7a85 100644
 --- a/src/env.h
 +++ b/src/env.h
 @@ -43,6 +43,7 @@
@@ -10,20 +10,29 @@ index 17aa6c7222..473a9fc89a 100644
  
  #include <array>
  #include <atomic>
-@@ -992,6 +993,7 @@ class Environment : public MemoryRetainer {
-   void MemoryInfo(MemoryTracker* tracker) const override;
+@@ -1464,6 +1465,14 @@ class Environment : public MemoryRetainer {
+   template <typename T>
+   void ForEachBindingData(T&& iterator);
  
-   EnvSerializeInfo Serialize(v8::SnapshotCreator* creator);
 +  fs::VirtualFileSystem* VFS() { return vfs_; }
-   void CreateProperties();
-   void DeserializeProperties(const EnvSerializeInfo* info);
- 
-@@ -1634,6 +1636,8 @@ class Environment : public MemoryRetainer {
++
++  void OnBootstrapCompleted();
++
++  void SetBootstrapCompletedCallback(StartExecutionCallback &callback) {
++    bootstrap_completed_callback_ = callback;
++  }
++
+  private:
+   inline void ThrowError(v8::Local<v8::Value> (*fun)(v8::Local<v8::String>),
+                          const char* errmsg);
+@@ -1634,6 +1643,10 @@ class Environment : public MemoryRetainer {
    // a given pointer.
    std::unordered_map<char*, std::unique_ptr<v8::BackingStore>>
        released_allocated_buffers_;
 +  
 +  fs::VirtualFileSystem* vfs_;
++
++  StartExecutionCallback bootstrap_completed_callback_;
  };
  
  }  // namespace node
