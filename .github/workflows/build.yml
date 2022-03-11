@@ -1,0 +1,99 @@
+name: Build Release
+
+on: workflow_dispatch
+
+env:
+  NODE_VERSION: v16.14.0
+
+jobs:
+  Android:
+    strategy:
+      matrix:
+        arch: [arm64, arm, x64, x86]
+    
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install tools
+      run: sudo apt-get install g++ gcc make gcc-multilib g++-multilib lib32z1 python3-pip python3-dev -y
+
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r20b
+
+    - name: Download Node.js tarball
+      run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
+
+    - name: Build Node.js
+      env:
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+      run: ./scripts/build_android.sh ${{ matrix.arch }}
+
+    - uses: benjlevesque/short-sha@v1.2
+      id: short-sha
+      with:
+        length: 7
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-android-${{ matrix.arch }}.zip
+        path: ./artifacts/android/${{ matrix.arch }}
+
+  macos:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install tools
+      run: brew install coreutils
+
+    - name: Download Node.js tarball
+      run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
+
+    - name: Build Node.js
+      run: ./scripts/build_host.sh
+
+    - uses: benjlevesque/short-sha@v1.2
+      id: short-sha
+      with:
+        length: 7
+    
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-macos-${{ env.RUNNER_ARCH }}.zip
+        path: ./artifacts/host
+
+
+  linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install tools
+      run: sudo apt-get install g++ gcc make gcc-multilib g++-multilib lib32z1 python3-pip python3-dev -y
+
+    - name: Download Node.js tarball
+      run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
+
+    - name: Build Node.js
+      run: ./scripts/build_host.sh
+
+    - uses: benjlevesque/short-sha@v1.2
+      id: short-sha
+      with:
+        length: 7
+    
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-linux-${{ env.RUNNER_ARCH }}.zip
+        path: ./artifacts/host

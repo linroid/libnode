@@ -6,7 +6,7 @@ if [[ "$CI" = true ]]; then
   source "${WORKSPACE}"/scripts/patch.sh apply -f
 fi
 
-PREFIX="${WORKSPACE}/artifacts/macos"
+PREFIX="${WORKSPACE}/artifacts/host"
 mkdir -p "$PREFIX"
 
 cd $NODE_SOURCE_PATH

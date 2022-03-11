@@ -8,8 +8,8 @@ fi
 
 if [[ -z "$ANDROID_ABI" ]]; then
   if [ $# -lt 1 ]; then
-    echo "Please specific a ABI(arm64, arm, x86_64, x86), for example:"
-    echo "./build.sh arm64"
+    echo "Please specific the arch(arm64, arm, x64, x86), for example:"
+    echo "./build_android.sh arm64"
     exit 1
   fi
   ARCH=$1
@@ -24,12 +24,10 @@ case $ARCH in
 arm)
   DEST_CPU="arm"
   TOOLCHAIN_NAME="armv7a-linux-androideabi"
-  ABI="armeabi-v7a"
   ;;
-arm64 | aarch64)
+arm64)
   DEST_CPU="arm64"
   TOOLCHAIN_NAME="aarch64-linux-android"
-  ABI="arm64-v8a"
   ;;
 x86)
   DEST_CPU="ia32"
@@ -38,11 +36,10 @@ x86)
   ABI="x86"
   EXTRA_OPTIONS="--openssl-no-asm"
   ;;
-x86_64)
+x64)
   DEST_CPU="x64"
   TOOLCHAIN_NAME="x86_64-linux-android"
   ARCH="x64"
-  ABI="x86_64"
   EXTRA_OPTIONS="--openssl-no-asm"
   ;;
 *)
@@ -53,7 +50,7 @@ esac
 
 ANDROID_SDK_VERSION=24
 
-PREFIX="$OUTPUT"/"${ABI}"
+PREFIX="$OUTPUT"/"${ARCH}"
 mkdir -p "$PREFIX"
 
 if [[ "$CI" != true ]]; then
@@ -126,7 +123,6 @@ cd $NODE_SOURCE_PATH
   --with-intl=none \
   --shared \
   ${EXTRA_OPTIONS} \
-  --release-urlbase=https://dorajs.com/
   # --debug-lib \
   # --debug-node \
   # --openssl-no-asm \
