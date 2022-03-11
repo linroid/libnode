@@ -111,7 +111,9 @@ jobs:
       - name: Environment Information
         run: npx envinfo
       - name: Download Node.js tarball
-        run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz | tar -xz  -C ./ && mv node-${{ env.NODE_VERSION }} node
+        run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
+      - name: Extract Node.js tarball
+        run: tar -xz -C ./ ./node-${{ env.NODE_VERSION }}.tar.gz && mv node-${{ env.NODE_VERSION }} node
       - name: Apply build patch for Windows
         working-directory: ./node
         run: patch --silent -p1 < ../patches.windows/dll.patch
