@@ -16,6 +16,7 @@ OUTPUT="${WORKSPACE}/artifacts/android"
 
 CC_VER="4.9"
 EXTRA_OPTIONS=
+TARGET_ARCH=$ARCH
 case $ARCH in
 arm)
   DEST_CPU="arm"
@@ -27,15 +28,13 @@ arm64)
   ;;
 x86)
   DEST_CPU="ia32"
-  ARCH="ia32"
+  TARGET_ARCH="ia32"
   TOOLCHAIN_NAME="i686-linux-android"
-  ABI="x86"
   EXTRA_OPTIONS="--openssl-no-asm"
   ;;
 x64)
   DEST_CPU="x64"
   TOOLCHAIN_NAME="x86_64-linux-android"
-  ARCH="x64"
   EXTRA_OPTIONS="--openssl-no-asm"
   ;;
 *)
@@ -93,10 +92,10 @@ export PATH=$TOOLCHAIN/bin:$PATH
 export CC=$TOOLCHAIN/bin/$SUFFIX-clang
 export CXX=$TOOLCHAIN/bin/$SUFFIX-clang++
 
-GYP_DEFINES="target_arch=$ARCH"
-GYP_DEFINES+=" v8_target_arch=$ARCH"
+GYP_DEFINES="target_arch=$TARGET_ARCH"
+GYP_DEFINES+=" v8_target_arch=$TARGET_ARCH"
 GYP_DEFINES+=" v8_target_os=android"
-GYP_DEFINES+=" android_target_arch=$ARCH"
+GYP_DEFINES+=" android_target_arch=$TARGET_ARCH"
 GYP_DEFINES+=" host_os=$HOST_OS OS=android"
 export GYP_DEFINES
 
