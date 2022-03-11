@@ -107,10 +107,8 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install deps
         run: choco install nasm
-      - name: Environment Information
-        run: npx envinfo
       - name: Download Node.js tarball
-        run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
+        run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
         run: tar -zxvf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
       - name: Apply build patch for Windows
