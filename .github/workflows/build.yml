@@ -1,12 +1,18 @@
-name: Build Release
+name: Build
 
-on: workflow_dispatch
+on: 
+  pull_request:
+    paths-ignore:
+      - README.md
+      - .github/**
+  workflow_dispatch:
 
 env:
   NODE_VERSION: v16.14.0
 
 jobs:
   Android:
+    if: github.event.pull_request.draft == false
     strategy:
       matrix:
         arch: [arm64, arm, x64, x86]
@@ -27,6 +33,9 @@ jobs:
     - name: Download Node.js tarball
       run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
 
+    - name: Apply patches
+      run: ./scripts/patch.sh apply -f
+
     - name: Build Node.js
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
@@ -43,10 +52,11 @@ jobs:
         name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-android-${{ matrix.arch }}.zip
         path: ./artifacts/android/${{ matrix.arch }}
 
-  macos:
-
+  macoOs:
+    
     runs-on: macos-latest
-
+    if: github.event.pull_request.draft == false
+    
     steps:
     - uses: actions/checkout@v2
 
@@ -55,6 +65,9 @@ jobs:
 
     - name: Download Node.js tarball
       run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
+    
+    - name: Apply patches
+      run: ./scripts/patch.sh apply -f
 
     - name: Build Node.js
       run: ./scripts/build_host.sh
@@ -71,10 +84,11 @@ jobs:
         path: ./artifacts/host
 
 
-  linux:
+  Linux:
 
     runs-on: ubuntu-latest
-
+    if: github.event.pull_request.draft == false
+    
     steps:
     - uses: actions/checkout@v2
 
@@ -97,3 +111,47 @@ jobs:
       with:
         name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-linux-${{ env.RUNNER_ARCH }}.zip
         path: ./artifacts/host
+
+  Windows:
+
+    runs-on: windows-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 
+          uses: actions/setup-python@v2
+          with:
+            python-version: 3.10
+
+      - name: Install deps
+        run: choco install nasm
+        
+      - name: Environment Information
+        run: npx envinfo
+
+      - name: Download Node.js tarball
+        run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
+
+      - name: Apply build patch for Windows
+        working-directory: ./node
+        run: patch --silent -p1 < ../patches.windows/dll.patch
+
+      - name: Apply common patches
+        run: ./scripts/patch.sh apply -f
+
+      - name: Build Node.js
+        working-directory: ./node
+        run: ./vcbuild.bat release dll package
+
+      - uses: benjlevesque/short-sha@v1.2
+        id: short-sha
+        with:
+          length: 7
+      
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.3.1
+        with:
+          name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-windows-${{ env.RUNNER_ARCH }}.zip
+          path: ./node/out/Release/node/${NODE_VERSION}-win-${{ env.RUNNER_ARCH }}

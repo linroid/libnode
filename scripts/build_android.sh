@@ -2,10 +2,6 @@
 
 source "$(dirname "$0")"/env.sh
 
-if [[ "$CI" = true ]]; then
-  source "${WORKSPACE}"/scripts/patch.sh apply -f
-fi
-
 if [[ -z "$ANDROID_ABI" ]]; then
   if [ $# -lt 1 ]; then
     echo "Please specific the arch(arm64, arm, x64, x86), for example:"

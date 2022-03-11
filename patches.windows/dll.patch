@@ -1,0 +1,431 @@
+From 294bfb57c8f22d88ef32aa22725cb41b9d34068b Mon Sep 17 00:00:00 2001
+From: William Marlow <william.marlow@ibm.com>
+Date: Fri, 4 Feb 2022 10:12:57 +0000
+Subject: [PATCH] build: Fix various shared library build issues.
+
+Node.js unofficially supports a shared library variant where the
+main node executable is a thin wrapper around node.dll/libnode.so.
+The key benefit of this is to support embedding Node.js in other
+applications.
+
+Since Node.js 12 there have been a number of issues preventing the
+shared library build from working correctly, primarily on Windows:
+
+* A number of functions used executables such as `mksnapshot` are
+    not exported from `libnode.dll` using a `NODE_EXTERN` attribute
+* A dependency on the `Winmm` system library is missing
+* Incorrect defines on executable targets leads to `node.exe`
+    claiming to export a number of functions that are actually in
+    `libnode.dll`
+* Because `node.exe` attempts to export symbols, `node.lib` gets
+    generated causing native extensions to try to link against
+    `node.exe` not `libnode.dll`.
+* Similarly, because `node.dll` was renamed to `libnode.dll`,
+    native extensions don't know to look for `libnode.lib` rather
+    than `node.lib`.
+* On macOS an RPATH is added to find `libnode.dylib` relative to
+    `node` in the same folder. This works fine from the
+    `out/Release` folder but not from an installed prefix, where
+    `node` will be in `bin/` and `libnode.dylib` will be in `lib/`.
+* Similarly on Linux, no RPATH is added so LD_LIBRARY_PATH needs
+    setting correctly for `bin/node` to find `lib/libnode.so`.
+
+For the `libnode.lib` vs `node.lib` issue there are two possible
+options:
+
+1. Ensure `node.lib` from `node.exe` does not get generated, and
+    instead copy `libnode.lib` to `node.lib`. This means addons
+    compiled when referencing the correct `node.lib` file will
+    correctly depend on `libnode.dll`. The down side is that
+    native addons compiled with stock Node.js will still try to
+    resolve symbols against node.exe rather than libnode.dll.
+2. After building `libnode.dll`, dump the exports using `dumpbin`,
+    and process this to generate a `node.def` file to be linked into
+    `node.exe` with the `/DEF:node.def` flag. The export entries
+    in `node.def` will all read
+    ```
+    my_symbol=libnode.my_symbol
+    ```
+    so that `node.exe` will redirect all exported symbols back to
+    `libnode.dll`. This has the benefit that addons compiled with
+    stock Node.js will load correctly into `node.exe` from a shared
+    library build, but means that every embedding executable also
+    needs to perform this same trick.
+
+I went with the first option as it is the cleaner of the two
+solutions in my opinion. Projects wishing to generate a shared
+library variant of Node.js can now, for example,
+```
+.\vcbuild dll package vs
+```
+to generate a full node installation including `libnode.dll`,
+`Release\node.lib`, and all the necessary headers. Native addons
+can then be built against the shared library build easily by
+specifying the correct `nodedir` option.
+
+For example
+```
+>npx node-gyp configure --nodedir C:\Users\User\node\Release\node-v18.0.0-win-x64
+...
+>npx node-gyp build
+...
+>dumpbin /dependents build\Release\binding.node
+Microsoft (R) COFF/PE Dumper Version 14.29.30136.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+Dump of file build\Release\binding.node
+
+File Type: DLL
+
+  Image has the following dependencies:
+
+    KERNEL32.dll
+    libnode.dll
+    VCRUNTIME140.dll
+    api-ms-win-crt-string-l1-1-0.dll
+    api-ms-win-crt-stdio-l1-1-0.dll
+    api-ms-win-crt-runtime-l1-1-0.dll
+...
+```
+---
+ node.gyp                   | 40 +++++++++++++++++++++++++++++++++++++-
+ node.gypi                  | 15 +++++++++++++-
+ src/debug_utils.h          |  6 +++---
+ src/env.h                  |  2 +-
+ src/node_internals.h       |  6 +++---
+ src/node_native_module.h   |  2 +-
+ src/node_snapshotable.h    |  2 +-
+ src/util.h                 |  6 ++++--
+ tools/install.py           | 23 +++++++++++-----------
+ tools/msvs/find_python.cmd | 11 +++++++++++
+ tools/v8_gypfiles/v8.gyp   |  1 -
+ vcbuild.bat                | 16 +++++++++++++++
+ 12 files changed, 104 insertions(+), 26 deletions(-)
+
+diff --git a/node.gyp b/node.gyp
+index d881e8509d..e9ce3fa05b 100644
+--- a/node.gyp
++++ b/node.gyp
+@@ -194,6 +194,11 @@
+           'dependencies': [ 'node_aix_shared' ],
+         }, {
+           'dependencies': [ '<(node_lib_target_name)' ],
++          'conditions': [
++            ['OS=="win" and node_shared=="true"', {
++              'dependencies': ['copy_libnode_implib']
++            }],
++          ],
+         }],
+         [ 'node_intermediate_lib_type=="static_library" and node_shared=="false"', {
+           'xcode_settings': {
+@@ -233,8 +238,15 @@
+         }],
+         [ 'node_shared=="true"', {
+           'xcode_settings': {
+-            'OTHER_LDFLAGS': [ '-Wl,-rpath,@loader_path', ],
++            'OTHER_LDFLAGS': [ '-Wl,-rpath,@loader_path', '-Wl,-rpath,@loader_path/../lib'],
+           },
++          'conditions': [
++            ['OS=="linux"', {
++               'ldflags': [
++                 '-Wl,-rpath,\\$$ORIGIN/../lib'
++               ],
++            }],
++          ],
+         }],
+         [ 'enable_lto=="true"', {
+           'xcode_settings': {
+@@ -639,6 +651,7 @@
+           'libraries': [
+             'Dbghelp',
+             'Psapi',
++            'Winmm',
+             'Ws2_32',
+           ],
+         }],
+@@ -1418,5 +1431,30 @@
+         }, # test_crypto_engine
+       ], # end targets
+     }], # end node_use_openssl section
++    ['OS=="win" and node_shared=="true"', {
++      'targets': [
++        {
++          'target_name': 'copy_libnode_implib',
++          'type': 'none',
++          'dependencies': ['<(node_lib_target_name)'],
++          'actions': [
++            {
++              'action_name': 'copy_libnode_implib_action',
++              'inputs': [
++                '<(PRODUCT_DIR)/<(node_lib_target_name).lib'
++              ],
++              'outputs': [
++                '<(PRODUCT_DIR)/<(node_core_target_name).lib',
++              ],
++              'action': [
++                'python', 'tools/copyfile.py',
++                '<@(_inputs)',
++                '<@(_outputs)',
++              ],
++            },
++          ],
++        },
++      ],
++    }]
+   ], # end conditions block
+ }
+diff --git a/node.gypi b/node.gypi
+index 713ddbb74a..f46f246e24 100644
+--- a/node.gypi
++++ b/node.gypi
+@@ -29,7 +29,7 @@
+     [ 'clang==1', {
+       'cflags': [ '-Werror=undefined-inline', ]
+     }],
+-    [ 'node_shared=="false" and "<(_type)"=="executable"', {
++    [ '"<(_type)"=="executable"', {
+       'msvs_settings': {
+         'VCManifestTool': {
+           'EmbedManifest': 'true',
+@@ -41,6 +41,19 @@
+       'defines': [
+         'NODE_SHARED_MODE',
+       ],
++      'conditions': [
++        ['"<(_type)"=="executable"', {
++          'defines': [
++            'USING_UV_SHARED',
++            'USING_V8_SHARED',
++            'BUILDING_NODE_EXTENSION'
++          ],
++          'defines!': [
++            'BUILDING_V8_SHARED=1',
++            'BUILDING_UV_SHARED=1'
++          ]
++        }],
++      ],
+     }],
+     [ 'OS=="win"', {
+       'defines!': [
+diff --git a/src/debug_utils.h b/src/debug_utils.h
+index 377493359e..5bfbdfa5c4 100644
+--- a/src/debug_utils.h
++++ b/src/debug_utils.h
+@@ -35,7 +35,7 @@ template <typename... Args>
+ inline std::string SPrintF(const char* format, Args&&... args);
+ template <typename... Args>
+ inline void FPrintF(FILE* file, const char* format, Args&&... args);
+-void FWrite(FILE* file, const std::string& str);
++void NODE_EXTERN FWrite(FILE* file, const std::string& str);
+ 
+ // Listing the AsyncWrap provider types first enables us to cast directly
+ // from a provider type to a debug category.
+@@ -57,7 +57,7 @@ enum class DebugCategory {
+       CATEGORY_COUNT
+ };
+ 
+-class EnabledDebugList {
++class NODE_EXTERN EnabledDebugList {
+  public:
+   bool enabled(DebugCategory category) const {
+     DCHECK_GE(static_cast<int>(category), 0);
+@@ -168,7 +168,7 @@ void CheckedUvLoopClose(uv_loop_t* loop);
+ void PrintLibuvHandleInformation(uv_loop_t* loop, FILE* stream);
+ 
+ namespace per_process {
+-extern EnabledDebugList enabled_debug_list;
++extern NODE_EXTERN EnabledDebugList enabled_debug_list;
+ 
+ template <typename... Args>
+ inline void FORCE_INLINE Debug(DebugCategory cat,
+diff --git a/src/env.h b/src/env.h
+index 17aa6c7222..58203e4982 100644
+--- a/src/env.h
++++ b/src/env.h
+@@ -557,7 +557,7 @@ class Environment;
+ struct AllocatedBuffer;
+ 
+ typedef size_t SnapshotIndex;
+-class IsolateData : public MemoryRetainer {
++class NODE_EXTERN IsolateData : public MemoryRetainer {
+  public:
+   IsolateData(v8::Isolate* isolate,
+               uv_loop_t* event_loop,
+diff --git a/src/node_internals.h b/src/node_internals.h
+index d37be23cd6..1e802ef962 100644
+--- a/src/node_internals.h
++++ b/src/node_internals.h
+@@ -320,13 +320,13 @@ enum InitializationSettingsFlags : uint64_t {
+ };
+ 
+ // TODO(codebytere): eventually document and expose to embedders.
+-InitializationResult InitializeOncePerProcess(int argc, char** argv);
+-InitializationResult InitializeOncePerProcess(
++InitializationResult NODE_EXTERN InitializeOncePerProcess(int argc, char** argv);
++InitializationResult NODE_EXTERN InitializeOncePerProcess(
+   int argc,
+   char** argv,
+   InitializationSettingsFlags flags,
+   ProcessFlags::Flags process_flags = ProcessFlags::kNoFlags);
+-void TearDownOncePerProcess();
++void NODE_EXTERN TearDownOncePerProcess();
+ void SetIsolateErrorHandlers(v8::Isolate* isolate, const IsolateSettings& s);
+ void SetIsolateMiscHandlers(v8::Isolate* isolate, const IsolateSettings& s);
+ void SetIsolateCreateParamsForNode(v8::Isolate::CreateParams* params);
+diff --git a/src/node_native_module.h b/src/node_native_module.h
+index 3be3f2364d..b1ff2a843d 100644
+--- a/src/node_native_module.h
++++ b/src/node_native_module.h
+@@ -29,7 +29,7 @@ using NativeModuleCacheMap =
+ // This class should not depend on any Environment, or depend on access to
+ // the its own singleton - that should be encapsulated in NativeModuleEnv
+ // instead.
+-class NativeModuleLoader {
++class NODE_EXTERN NativeModuleLoader {
+  public:
+   NativeModuleLoader(const NativeModuleLoader&) = delete;
+   NativeModuleLoader& operator=(const NativeModuleLoader&) = delete;
+diff --git a/src/node_snapshotable.h b/src/node_snapshotable.h
+index 1ccd9a9322..b407580dcf 100644
+--- a/src/node_snapshotable.h
++++ b/src/node_snapshotable.h
+@@ -123,7 +123,7 @@ void SerializeBindingData(Environment* env,
+ 
+ bool IsSnapshotableType(FastStringKey key);
+ 
+-class SnapshotBuilder {
++class NODE_EXTERN SnapshotBuilder {
+  public:
+   static std::string Generate(const std::vector<std::string> args,
+                               const std::vector<std::string> exec_args);
+diff --git a/src/util.h b/src/util.h
+index 06c67d273b..29350f58cd 100644
+--- a/src/util.h
++++ b/src/util.h
+@@ -26,6 +26,8 @@
+ 
+ #include "v8.h"
+ 
++#include "node.h"
++
+ #include <climits>
+ #include <cstddef>
+ #include <cstdio>
+@@ -108,8 +110,8 @@ struct AssertionInfo {
+   const char* message;
+   const char* function;
+ };
+-[[noreturn]] void Assert(const AssertionInfo& info);
+-[[noreturn]] void Abort();
++[[noreturn]] void NODE_EXTERN Assert(const AssertionInfo& info);
++[[noreturn]] void NODE_EXTERN Abort();
+ void DumpBacktrace(FILE* fp);
+ 
+ // Windows 8+ does not like abort() in Release mode
+diff --git a/tools/install.py b/tools/install.py
+index eafcb19bf8..655e8fac5b 100755
+--- a/tools/install.py
++++ b/tools/install.py
+@@ -133,20 +133,19 @@ def files(action):
+   output_file = 'node'
+   output_prefix = 'out/Release/'
+ 
+-  if 'false' == variables.get('node_shared'):
+-    if is_windows:
+-      output_file += '.exe'
+-  else:
+-    if is_windows:
+-      output_file += '.dll'
+-    else:
+-      output_file = 'lib' + output_file + '.' + variables.get('shlib_suffix')
++  if is_windows:
++    output_file += '.exe'
++  action([output_prefix + output_file], 'bin/' + output_file)
+ 
+-  if 'false' == variables.get('node_shared'):
+-    action([output_prefix + output_file], 'bin/' + output_file)
+-  else:
+-    action([output_prefix + output_file], 'lib/' + output_file)
+ 
++  if 'true' == variables.get('node_shared'):
++    if is_windows:
++      action([output_prefix + 'libnode.dll'], 'bin/libnode.dll')
++      action([output_prefix + 'libnode.lib'], 'lib/libnode.lib')
++    else:
++      output_lib = 'libnode.' + variables.get('shlib_suffix')
++      action([output_prefix + output_lib], 'lib/' + output_lib)
++  
+   if 'true' == variables.get('node_use_dtrace'):
+     action(['out/Release/node.d'], 'lib/dtrace/node.d')
+ 
+diff --git a/tools/msvs/find_python.cmd b/tools/msvs/find_python.cmd
+index 8554d026cd..75f2bf63d9 100644
+--- a/tools/msvs/find_python.cmd
++++ b/tools/msvs/find_python.cmd
+@@ -46,6 +46,8 @@ exit /b 1
+ 
+ :found-python
+ echo Python found in %p%\python.exe
++call :check-python "%p%\python.exe"
++if errorlevel 1 goto :no-python
+ endlocal ^
+   & set "pt=%p%" ^
+   & set "need_path_ext=%need_path%"
+@@ -54,6 +56,15 @@ set "pt="
+ set "need_path_ext="
+ exit /b 0
+ 
++:check-python
++%* -V
++:: 9009 means error file not found
++if %errorlevel% equ 9009 (
++  echo Not an executable Python program
++  exit /b 1
++)
++exit /b 0
++
+ :no-python
+ echo Could not find Python.
+ exit /b 1
+diff --git a/tools/v8_gypfiles/v8.gyp b/tools/v8_gypfiles/v8.gyp
+index a80778d3fa..61bc9d2d6f 100644
+--- a/tools/v8_gypfiles/v8.gyp
++++ b/tools/v8_gypfiles/v8.gyp
+@@ -87,7 +87,6 @@
+             "<(SHARED_INTERMEDIATE_DIR)/torque-generated/exported-macros-assembler.h",
+             "<(SHARED_INTERMEDIATE_DIR)/torque-generated/factory.cc",
+             "<(SHARED_INTERMEDIATE_DIR)/torque-generated/factory.inc",
+-            "<(SHARED_INTERMEDIATE_DIR)/torque-generated/field-offsets.h",
+             "<(SHARED_INTERMEDIATE_DIR)/torque-generated/instance-types.h",
+             "<(SHARED_INTERMEDIATE_DIR)/torque-generated/interface-descriptors.inc",
+             "<(SHARED_INTERMEDIATE_DIR)/torque-generated/objects-body-descriptors-inl.inc",
+diff --git a/vcbuild.bat b/vcbuild.bat
+index d1a9e59255..2e2daa994d 100644
+--- a/vcbuild.bat
++++ b/vcbuild.bat
+@@ -469,6 +469,22 @@ if not defined noetw (
+     copy /Y ..\src\res\node_etw_provider.man %TARGET_NAME%\ > nul
+     if errorlevel 1 echo Cannot copy node_etw_provider.man && goto package_error
+ )
++if defined dll (
++  copy /Y libnode.dll %TARGET_NAME%\ > nul
++  if errorlevel 1 echo Cannot copy libnode.dll && goto package_error
++
++  mkdir %TARGET_NAME%\Release > nul
++  copy /Y node.lib %TARGET_NAME%\Release\ > nul
++  if errorlevel 1 echo Cannot copy node.lib && goto package_error
++
++  copy /Y ..\common.gypi %TARGET_NAME%\ > nul
++  if errorlevel 1 echo Cannot copy common.gypi && goto package_error
++
++  set HEADERS_ONLY=1
++  python ..\tools\install.py install %CD%\%TARGET_NAME% \ > nul
++  if errorlevel 1 echo Cannot install headers && goto package_error
++  set HEADERS_ONLY=
++)
+ cd ..
+ 
+ :package
+-- 
+2.35.1.windows.2
+
