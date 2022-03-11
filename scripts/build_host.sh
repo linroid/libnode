@@ -2,10 +2,6 @@
 
 source "$(dirname "$0")"/env.sh
 
-if [[ "$CI" = true ]]; then
-  source "${WORKSPACE}"/scripts/patch.sh apply -f
-fi
-
 PREFIX="${WORKSPACE}/artifacts/host"
 mkdir -p "$PREFIX"
 
