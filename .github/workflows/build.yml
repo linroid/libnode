@@ -16,140 +16,105 @@ jobs:
     strategy:
       matrix:
         arch: [arm64, arm, x64, x86]
-    
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
-
     - name: Install tools
       run: sudo apt-get install g++ gcc make gcc-multilib g++-multilib lib32z1 python3-pip python3-dev -y
-
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
         ndk-version: r20b
-
     - name: Download Node.js tarball
       run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
-
     - name: Apply patches
       run: ./scripts/patch.sh apply -f
-
     - name: Build Node.js
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       run: ./scripts/build_android.sh ${{ matrix.arch }}
-
     - uses: benjlevesque/short-sha@v1.2
       id: short-sha
       with:
         length: 7
-
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
         name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-android-${{ matrix.arch }}.zip
         path: ./artifacts/android/${{ matrix.arch }}
 
-  macoOs:
-    
+  macOS:
     runs-on: macos-latest
     if: github.event.pull_request.draft == false
-    
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Install tools
-      run: brew install coreutils
-
-    - name: Download Node.js tarball
-      run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
-    
-    - name: Apply patches
-      run: ./scripts/patch.sh apply -f
-
-    - name: Build Node.js
-      run: ./scripts/build_host.sh
-
-    - uses: benjlevesque/short-sha@v1.2
-      id: short-sha
-      with:
-        length: 7
-    
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.3.1
-      with:
-        name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-macos-${{ env.RUNNER_ARCH }}.zip
-        path: ./artifacts/host
-
-
-  Linux:
-
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
-    
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Install tools
-      run: sudo apt-get install g++ gcc make gcc-multilib g++-multilib lib32z1 python3-pip python3-dev -y
-
-    - name: Download Node.js tarball
-      run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
-
-    - name: Build Node.js
-      run: ./scripts/build_host.sh
-
-    - uses: benjlevesque/short-sha@v1.2
-      id: short-sha
-      with:
-        length: 7
-    
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.3.1
-      with:
-        name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-linux-${{ env.RUNNER_ARCH }}.zip
-        path: ./artifacts/host
-
-  Windows:
-
-    runs-on: windows-latest
-    if: github.event.pull_request.draft == false
-
     steps:
       - uses: actions/checkout@v2
-
-      - name: Set up Python 
-          uses: actions/setup-python@v2
-          with:
-            python-version: 3.10
-
-      - name: Install deps
-        run: choco install nasm
-        
-      - name: Environment Information
-        run: npx envinfo
-
+      - name: Install tools
+        run: brew install coreutils
       - name: Download Node.js tarball
         run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
-
-      - name: Apply build patch for Windows
-        working-directory: ./node
-        run: patch --silent -p1 < ../patches.windows/dll.patch
-
-      - name: Apply common patches
+      - name: Apply patches
         run: ./scripts/patch.sh apply -f
-
       - name: Build Node.js
-        working-directory: ./node
-        run: ./vcbuild.bat release dll package
-
+        run: ./scripts/build_host.sh
       - uses: benjlevesque/short-sha@v1.2
         id: short-sha
         with:
           length: 7
-      
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.3.1
+        with:
+          name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-macos-${{ env.RUNNER_ARCH }}.zip
+          path: ./artifacts/host
+
+
+  Linux:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install tools
+        run: sudo apt-get install g++ gcc make gcc-multilib g++-multilib lib32z1 python3-pip python3-dev -y
+      - name: Download Node.js tarball
+        run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
+      - name: Build Node.js
+        run: ./scripts/build_host.sh
+      - uses: benjlevesque/short-sha@v1.2
+        id: short-sha
+        with:
+          length: 7
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.3.1
+        with:
+          name: libnode-${{ env.NODE_VERSION }}-${{ steps.short-sha.outputs.sha }}-linux-${{ env.RUNNER_ARCH }}.zip
+          path: ./artifacts/host
+
+  Windows:
+    runs-on: windows-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+      - name: Install deps
+        run: choco install nasm
+      - name: Environment Information
+        run: npx envinfo
+      - name: Download Node.js tarball
+        run: curl https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}.tar.gz | tar -xz  -C ./ && mv node-${NODE_VERSION} node
+      - name: Apply build patch for Windows
+        working-directory: ./node
+        run: patch --silent -p1 < ../patches.windows/dll.patch
+      - name: Apply common patches
+        run: ./scripts/patch.sh apply -f
+      - name: Build Node.js
+        working-directory: ./node
+        run: ./vcbuild.bat release dll package
+      - uses: benjlevesque/short-sha@v1.2
+        id: short-sha
+        with:
+          length: 7
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.3.1
         with:
