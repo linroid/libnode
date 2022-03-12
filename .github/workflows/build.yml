@@ -6,7 +6,9 @@ on:
       - README.md
       - .github/**
   workflow_dispatch:
-
+  push:
+    tags:
+      - "v*"
 env:
   NODE_VERSION: v16.14.0
   PYTHON_VERSION: '3.10'
