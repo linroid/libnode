@@ -115,6 +115,7 @@ cd $NODE_SOURCE_PATH
   --without-etw \
   --without-report \
   --without-dtrace \
+  --without-corepack \
   --with-intl=none \
   --shared \
   ${EXTRA_OPTIONS} \

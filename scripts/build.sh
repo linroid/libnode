@@ -12,13 +12,12 @@ cd $NODE_SOURCE_PATH
   --v8-with-dchecks \
   --verbose \
   -C \
-  --without-node-snapshot \
-  --without-node-code-cache \
   --without-npm \
   --without-etw \
   --without-report \
   --without-dtrace \
-  --with-intl=none \
+  --without-corepack \
+  --with-intl=small-icu \
   --shared
 
 make -j${WORKER_COUNT}
