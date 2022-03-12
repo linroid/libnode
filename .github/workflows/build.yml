@@ -34,14 +34,15 @@ jobs:
       run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
     - name: Extract Node.js tarball
       run: |
-        tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+        tar -zxvf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
         mv node-${{ env.NODE_VERSION }} node
+        rm ./node-${{ env.NODE_VERSION }}.tar.gz
     - name: Cache build
       uses: actions/cache@v2
       with:
         path: ./node/out
         key: node-out-android-${{ env.NODE_VERSION }}-${{ matrix.arch }}
-    - name: Apply patches
+    - name: Apply common patches
       run: ./scripts/patch.sh apply -f
     - name: Build Node.js
       env:
@@ -71,15 +72,16 @@ jobs:
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
         run: |
-          tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+          tar -zxvf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
           mv node-${{ env.NODE_VERSION }} node
+          rm ./node-${{ env.NODE_VERSION }}.tar.gz
+      - name: Apply common patches
+        run: ./scripts/patch.sh apply -f
       - name: Cache build
         uses: actions/cache@v2
         with:
           path: ./node/out
           key: node-out-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ matrix.arch }}
-      - name: Apply patches
-        run: ./scripts/patch.sh apply -f
       - name: Build Node.js
         run: ./scripts/build.sh
       - uses: benjlevesque/short-sha@v1.2
@@ -111,8 +113,11 @@ jobs:
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
         run: |
-          tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
-          mv node-${{ env.NODE_VERSION }} node
+          tar -zxvf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+          mv node-${{ env.NODE_VERSION }} 
+          rm ./node-${{ env.NODE_VERSION }}.tar.gz
+      - name: Apply common patches
+        run: ./scripts/patch.sh apply -f
       - name: Cache build
         uses: actions/cache@v2
         with:
@@ -159,18 +164,19 @@ jobs:
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
         run: |
-          tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+          tar -zxvf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
           mv node-${{ env.NODE_VERSION }} node
-      - name: Cache build
-        uses: actions/cache@v2
-        with:
-          path: ./node/out
-          key: node-out-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ matrix.arch }}
+          rm ./node-${{ env.NODE_VERSION }}.tar.gz
       - name: Apply build patch for Windows
         working-directory: ./node
         run: patch --silent -p1 -i ../patches.windows/dll.patch
       - name: Apply common patches
         run: ./scripts/patch.sh apply -f
+      - name: Cache build
+        uses: actions/cache@v2
+        with:
+          path: ./node/out
+          key: node-out-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ matrix.arch }}
       - name: Build Node.js
         working-directory: ./node
         run: ./vcbuild.bat release dll package
