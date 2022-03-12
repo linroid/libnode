@@ -31,7 +31,14 @@ jobs:
       with:
         ndk-version: r20b
     - name: Download Node.js tarball
-      run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz | tar -xz  -C ./ && mv node-${{ env.NODE_VERSION }} node
+      run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
+    - name: Extract Node.js tarball
+      run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
+    - name: Cache build
+      uses: actions/cache@v2
+      with:
+        path: ./node/out
+        key: node-${{ env.NODE_VERSION }}-android-${{ matrix.arch }}
     - name: Apply patches
       run: ./scripts/patch.sh apply -f
     - name: Build Node.js
@@ -59,7 +66,14 @@ jobs:
       - name: Install tools
         run: brew install coreutils
       - name: Download Node.js tarball
-        run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz | tar -xz  -C ./ && mv node-${{ env.NODE_VERSION }} node
+        run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
+      - name: Extract Node.js tarball
+        run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
+      - name: Cache build
+        uses: actions/cache@v2
+        with:
+          path: ./node/out
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-android-${{ matrix.arch }}
       - name: Apply patches
         run: ./scripts/patch.sh apply -f
       - name: Build Node.js
@@ -90,7 +104,14 @@ jobs:
         run: sudo apt-get install g++ gcc make gcc-multilib g++-multilib lib32z1 -y
         if: ${{ matrix.arch == 'x64' }}
       - name: Download Node.js tarball
-        run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz | tar -xz  -C ./ && mv node-${{ env.NODE_VERSION }} node
+        run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
+      - name: Extract Node.js tarball
+        run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
+      - name: Cache build
+        uses: actions/cache@v2
+        with:
+          path: ./node/out
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-android-${{ matrix.arch }}
       - name: Build Node.js (x64)
         if: ${{ matrix.arch == 'x64' }}
         run: ./scripts/build.sh
@@ -132,6 +153,11 @@ jobs:
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
         run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
+      - name: Cache build
+        uses: actions/cache@v2
+        with:
+          path: ./node/out
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-android-${{ matrix.arch }}
       - name: Apply build patch for Windows
         working-directory: ./node
         run: patch --silent -p1 -i ../patches.windows/dll.patch
