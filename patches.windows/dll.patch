@@ -1,4 +1,4 @@
-From 294bfb57c8f22d88ef32aa22725cb41b9d34068b Mon Sep 17 00:00:00 2001
+From 1415228c7225d353d7ac9be823c51b8790b05c38 Mon Sep 17 00:00:00 2001
 From: William Marlow <william.marlow@ibm.com>
 Date: Fri, 4 Feb 2022 10:12:57 +0000
 Subject: [PATCH] build: Fix various shared library build issues.
@@ -96,11 +96,13 @@ File Type: DLL
  src/node_native_module.h   |  2 +-
  src/node_snapshotable.h    |  2 +-
  src/util.h                 |  6 ++++--
+ tools/copyfile.py          | 31 +++++++++++++++++++++++++++++
  tools/install.py           | 23 +++++++++++-----------
  tools/msvs/find_python.cmd | 11 +++++++++++
  tools/v8_gypfiles/v8.gyp   |  1 -
- vcbuild.bat                | 16 +++++++++++++++
- 12 files changed, 104 insertions(+), 26 deletions(-)
+ vcbuild.bat                | 19 ++++++++++++++++++
+ 13 files changed, 138 insertions(+), 26 deletions(-)
+ create mode 100644 tools/copyfile.py
 
 diff --git a/node.gyp b/node.gyp
 index d881e8509d..e9ce3fa05b 100644
@@ -322,6 +324,43 @@ index 06c67d273b..29350f58cd 100644
  void DumpBacktrace(FILE* fp);
  
  // Windows 8+ does not like abort() in Release mode
+diff --git a/tools/copyfile.py b/tools/copyfile.py
+new file mode 100644
+index 0000000000..0ec642a0bf
+--- /dev/null
++++ b/tools/copyfile.py
+@@ -0,0 +1,31 @@
++# Copyright 2008 the V8 project authors. All rights reserved.
++# Redistribution and use in source and binary forms, with or without
++# modification, are permitted provided that the following conditions are
++# met:
++#
++#     * Redistributions of source code must retain the above copyright
++#       notice, this list of conditions and the following disclaimer.
++#     * Redistributions in binary form must reproduce the above
++#       copyright notice, this list of conditions and the following
++#       disclaimer in the documentation and/or other materials provided
++#       with the distribution.
++#     * Neither the name of Google Inc. nor the names of its
++#       contributors may be used to endorse or promote products derived
++#       from this software without specific prior written permission.
++#
++# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++
++
++from shutil import copyfile
++import sys
++copyfile(sys.argv[1], sys.argv[2])
 diff --git a/tools/install.py b/tools/install.py
 index eafcb19bf8..655e8fac5b 100755
 --- a/tools/install.py
@@ -400,20 +439,23 @@ index a80778d3fa..61bc9d2d6f 100644
              "<(SHARED_INTERMEDIATE_DIR)/torque-generated/interface-descriptors.inc",
              "<(SHARED_INTERMEDIATE_DIR)/torque-generated/objects-body-descriptors-inl.inc",
 diff --git a/vcbuild.bat b/vcbuild.bat
-index d1a9e59255..2e2daa994d 100644
+index d1a9e59255..909aca83c7 100644
 --- a/vcbuild.bat
 +++ b/vcbuild.bat
-@@ -469,6 +469,22 @@ if not defined noetw (
+@@ -469,6 +469,25 @@ if not defined noetw (
      copy /Y ..\src\res\node_etw_provider.man %TARGET_NAME%\ > nul
      if errorlevel 1 echo Cannot copy node_etw_provider.man && goto package_error
  )
 +if defined dll (
-+  copy /Y libnode.dll %TARGET_NAME%\ > nul
++  mkdir %TARGET_NAME%\lib > nul
++  copy /Y libnode.dll %TARGET_NAME%\lib > nul
 +  if errorlevel 1 echo Cannot copy libnode.dll && goto package_error
++  copy /Y libnode.lib %TARGET_NAME%\lib > nul
++  if errorlevel 1 echo Cannot copy libnode.lib && goto package_error
 +
-+  mkdir %TARGET_NAME%\Release > nul
-+  copy /Y node.lib %TARGET_NAME%\Release\ > nul
-+  if errorlevel 1 echo Cannot copy node.lib && goto package_error
++  mkdir %TARGET_NAME%\bin > nul
++  copy /Y node.exe %TARGET_NAME%\bin > nul
++  if errorlevel 1 echo Cannot copy node.exe && goto package_error
 +
 +  copy /Y ..\common.gypi %TARGET_NAME%\ > nul
 +  if errorlevel 1 echo Cannot copy common.gypi && goto package_error

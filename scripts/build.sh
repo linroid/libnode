@@ -2,10 +2,6 @@
 
 source "$(dirname "$0")"/env.sh
 
-if [[ "$CI" = true ]]; then
-  source "${WORKSPACE}"/scripts/patch.sh apply -f
-fi
-
 PREFIX="${WORKSPACE}/artifacts/host"
 mkdir -p "$PREFIX"
 
@@ -23,8 +19,7 @@ cd $NODE_SOURCE_PATH
   --without-report \
   --without-dtrace \
   --with-intl=none \
-  --shared \
-  --release-urlbase=https://dorajs.com/
+  --shared
 
 make -j${WORKER_COUNT}
 make install
