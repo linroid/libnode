@@ -33,7 +33,9 @@ jobs:
     - name: Download Node.js tarball
       run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
     - name: Extract Node.js tarball
-      run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
+      run: |
+        tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+        mv node-${{ env.NODE_VERSION }} node
     - name: Cache build
       uses: actions/cache@v2
       with:
@@ -68,7 +70,9 @@ jobs:
       - name: Download Node.js tarball
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
-        run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
+        run: |
+          tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+          mv node-${{ env.NODE_VERSION }} node
       - name: Cache build
         uses: actions/cache@v2
         with:
@@ -106,7 +110,9 @@ jobs:
       - name: Download Node.js tarball
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
-        run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
+        run: |
+          tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+          mv node-${{ env.NODE_VERSION }} node
       - name: Cache build
         uses: actions/cache@v2
         with:
@@ -152,7 +158,9 @@ jobs:
       - name: Download Node.js tarball
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
-        run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
+        run: |
+          tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+          mv node-${{ env.NODE_VERSION }} node
       - name: Cache build
         uses: actions/cache@v2
         with:
