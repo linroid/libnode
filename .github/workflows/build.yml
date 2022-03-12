@@ -31,7 +31,7 @@ jobs:
       with:
         ndk-version: r20b
     - name: Download Node.js tarball
-      run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
+      run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
     - name: Extract Node.js tarball
       run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
     - name: Cache build
@@ -66,7 +66,7 @@ jobs:
       - name: Install tools
         run: brew install coreutils
       - name: Download Node.js tarball
-        run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
+        run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
         run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
       - name: Cache build
@@ -104,7 +104,7 @@ jobs:
         run: sudo apt-get install g++ gcc make gcc-multilib g++-multilib lib32z1 -y
         if: ${{ matrix.arch == 'x64' }}
       - name: Download Node.js tarball
-        run: curl https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
+        run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
         run: tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./ && mv node-${{ env.NODE_VERSION }} node
       - name: Cache build
