@@ -11,17 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     needs: Build
     steps:
-      - uses: actions/checkout@v2
       - uses: actions/download-artifact@v3
         with:
           path: ./artifacts
       - name: Display structure of downloaded files
         run: ls -R ./artifacts
+      - name: Zip Artifacts
+        run: |
+          mkdir archived
+          ls -d1 *.zip | xargs -I name sh -c "zip -r ./archived/name ./name/"
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
-          artifacts: "./artifacts/*.zip"
+          artifacts: "./archived/*.zip"
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
