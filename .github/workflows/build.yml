@@ -34,10 +34,10 @@ jobs:
       run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
     - name: Extract Node.js tarball
       run: |
-        tar -zxvf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+        tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
         mv node-${{ env.NODE_VERSION }} node
         rm ./node-${{ env.NODE_VERSION }}.tar.gz
-    - name: Cache build
+    - name: Checkout build cache
       uses: actions/cache@v2
       with:
         path: ./node/out
@@ -72,12 +72,12 @@ jobs:
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
         run: |
-          tar -zxvf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+          tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
           mv node-${{ env.NODE_VERSION }} node
           rm ./node-${{ env.NODE_VERSION }}.tar.gz
       - name: Apply common patches
         run: ./scripts/patch.sh apply -f
-      - name: Cache build
+      - name: Checkout build cache
         uses: actions/cache@v2
         with:
           path: ./node/out
@@ -113,12 +113,12 @@ jobs:
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
         run: |
-          tar -zxvf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
-          mv node-${{ env.NODE_VERSION }} 
+          tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+          mv node-${{ env.NODE_VERSION }} node
           rm ./node-${{ env.NODE_VERSION }}.tar.gz
       - name: Apply common patches
         run: ./scripts/patch.sh apply -f
-      - name: Cache build
+      - name: Checkout build cache
         uses: actions/cache@v2
         with:
           path: ./node/out
@@ -164,7 +164,7 @@ jobs:
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
       - name: Extract Node.js tarball
         run: |
-          tar -zxvf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
+          tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
           mv node-${{ env.NODE_VERSION }} node
           rm ./node-${{ env.NODE_VERSION }}.tar.gz
       - name: Apply build patch for Windows
@@ -172,7 +172,7 @@ jobs:
         run: patch --silent -p1 -i ../patches.windows/dll.patch
       - name: Apply common patches
         run: ./scripts/patch.sh apply -f
-      - name: Cache build
+      - name: Checkout build cache
         uses: actions/cache@v2
         with:
           path: ./node/out
