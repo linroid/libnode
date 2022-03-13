@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
+    - name: Print all enviroments
+      run: printenv
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@v2
       with:
@@ -37,13 +39,13 @@ jobs:
         tar -zxf ./node-${{ env.NODE_VERSION }}.tar.gz -C ./
         mv node-${{ env.NODE_VERSION }} node
         rm ./node-${{ env.NODE_VERSION }}.tar.gz
+    - name: Apply common patches
+      run: ./scripts/patch.sh apply -f
     - name: Checkout build cache
       uses: actions/cache@v2
       with:
         path: ./node/out
         key: node-out-android-${{ env.NODE_VERSION }}-${{ matrix.arch }}
-    - name: Apply common patches
-      run: ./scripts/patch.sh apply -f
     - name: Build Node.js
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
@@ -66,6 +68,8 @@ jobs:
         arch: [x64]
     steps:
       - uses: actions/checkout@v2
+      - name: Print all enviroments
+        run: printenv
       - name: Install tools
         run: brew install coreutils
       - name: Download Node.js tarball
@@ -102,6 +106,8 @@ jobs:
         arch: [x64]
     steps:
       - uses: actions/checkout@v2
+      - name: Print all enviroments
+        run: printenv
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v2
         with:
