@@ -17,12 +17,11 @@ jobs:
       - name: Zip Artifacts
         run: |
           mkdir archived
-          ls -d1 *.zip | xargs -I name sh -c "pushd name; zip -r ../archived/name ./; popd"
+          ls -d1 *.zip | xargs -I name sh -c "cd name; zip -r ../archived/name ./; cd .."
       - name: Create Release
-        uses: ncipollo/release-action@v1
+        uses: softprops/action-gh-release@v1
         with:
-          allowUpdates: true
-          artifacts: "./archived/*.zip"
-          generateReleaseNotes: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true
+          files: "./archived/*.zip"
+          generate_release_notes: true
 

@@ -10,6 +10,7 @@ on:
 env:
   NODE_VERSION: v16.14.0
   PYTHON_VERSION: '3.10'
+  CACHE_VERSION: v1
 
 jobs:
   Android:
@@ -45,7 +46,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ./node/out
-        key: node-out-android-${{ env.NODE_VERSION }}-${{ matrix.arch }}
+        key: node-out-android-${{ env.NODE_VERSION }}-${{ matrix.arch }}-${{ env.CACHE_VERSION }}
     - name: Build Node.js
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
@@ -81,11 +82,11 @@ jobs:
           rm ./node-${{ env.NODE_VERSION }}.tar.gz
       - name: Apply common patches
         run: ./scripts/patch.sh apply -f
-      - name: Checkout build cache
-        uses: actions/cache@v2
-        with:
-          path: ./node/out
-          key: node-out-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ matrix.arch }}
+      # - name: Checkout build cache
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ./node/out
+      #     key: node-out-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ matrix.arch }}-${{ env.CACHE_VERSION }}
       - name: Build Node.js
         run: ./scripts/build.sh
       - uses: benjlevesque/short-sha@v1.2
@@ -124,11 +125,11 @@ jobs:
           rm ./node-${{ env.NODE_VERSION }}.tar.gz
       - name: Apply common patches
         run: ./scripts/patch.sh apply -f
-      - name: Checkout build cache
-        uses: actions/cache@v2
-        with:
-          path: ./node/out
-          key: node-out-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ matrix.arch }}
+      # - name: Checkout build cache
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ./node/out
+      #     key: node-out-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ matrix.arch }}-${{ env.CACHE_VERSION }}
       - name: Build Node.js (x64)
         if: ${{ matrix.arch == 'x64' }}
         run: ./scripts/build.sh
@@ -178,11 +179,11 @@ jobs:
         run: patch --silent -p1 -i ../patches.windows/dll.patch
       - name: Apply common patches
         run: ./scripts/patch.sh apply -f
-      - name: Checkout build cache
-        uses: actions/cache@v2
-        with:
-          path: ./node/out
-          key: node-out-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ matrix.arch }}
+      # - name: Checkout build cache
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ./node/out
+      #     key: node-out-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ matrix.arch }}-${{ env.CACHE_VERSION }}
       - name: Build Node.js
         working-directory: ./node
         run: ./vcbuild.bat release dll package
