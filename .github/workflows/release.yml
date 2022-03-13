@@ -14,12 +14,10 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: ./
-      - name: Display structure of downloaded files
-        run: ls -R ./artifacts
       - name: Zip Artifacts
         run: |
           mkdir archived
-          ls -d1 *.zip | xargs -I name sh -c "zip -r ./archived/name ./name/"
+          ls -d1 *.zip | xargs -I name sh -c "pushd name; zip -r ../archived/name ./; popd"
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
