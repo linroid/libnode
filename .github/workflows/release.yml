@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
         with:
-          path: ./artifacts
+          path: ./
       - name: Display structure of downloaded files
         run: ls -R ./artifacts
       - name: Zip Artifacts
