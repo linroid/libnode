@@ -114,7 +114,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install tools
-        run: sudo apt-get install g++ gcc make gcc-multilib g++-multilib lib32z1 -y
+        run: sudo apt-get install g++ gcc make -y
         if: ${{ matrix.arch == 'x64' }}
       - name: Download Node.js tarball
         run: curl -O https://nodejs.org/dist/${{ env.NODE_VERSION }}/node-${{ env.NODE_VERSION }}.tar.gz
