@@ -28,7 +28,7 @@ generate_patches() {
 apply_patches() {
   echo "Applying patch files..."
   cd "$NODE_SOURCE_PATH" || exit
-  if [[ $(git status --porcelain) ]]; then
+  if [[ -z "${CI}" ]] && [[ $(git status --porcelain) ]]; then
     if [[ $1 == "-f" ]]; then
       echo "Dropping local changes..."
       stash_new_files
